@@ -1,35 +1,37 @@
+#!/usr/bin/env python
 ############### Imports and globals ##############
 import socket
 import sys
+from request import Request
 
 import logging
 logging.basicConfig(level=logging.DEBUG,format='%(name)s: %(message)s',)
 logger = logging.getLogger('client')
 HOST = ''
 PORT = 8888
+MENU = '1. create user\n2. login\n3. logout\n4. send message\n5. quit'
 ##################################################
-
-# Connecting to server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-logger.debug('connecting to server')
-s.connect((HOST,PORT))
-logger.debug('connected')
 # main loop
 try:
     while True:
+        #connect to the server
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        logger.debug('connecting to server')
         s.connect((HOST,PORT))
-        # send the data
-        message = raw_input('---> ')
-        print(message)
-        if message == 'quit': break
-        logger.debug('sending data: %s', message)
-        len_sent = s.send(message)
-        #receive respond
-        logger.debug('waiting for response')
-        response = s.recv(1024)
-        logger.debug('response from server: "%s"', response)
+        print MENU
+        opt = int(input("num: "))
+        if   opt == 1:
+            msg = Request(0,0,0)
+        elif opt == 5: break
+        else:
+            message = raw_input('---> ')
+            msg = Request(0,1,3,message)
+
+        #logger.debug('sending data: %s', message)
+        print msg.to_s()
+
+        if opt != 5:
+            len_sent = s.send(msg.to_s())
+            response = s.recv(1024)
         s.close()
 finally:
     # clean up
