@@ -1,9 +1,13 @@
+############### Imports and globals ##############
 import SocketServer
 
 import logging
 logging.basicConfig(level=logging.DEBUG,format='%(name)s: %(message)s',)
-
-class EchoRequestHandler(SocketServer.BaseRequestHandler):
+logger = logging.getLogger('client')
+HOST = ''
+PORT = 8888
+##################################################
+class InstantMessageHandler(SocketServer.BaseRequestHandler):
     def __init__(self, request, client_addr, server):
         self.logger = logging.getLogger("EchoRequestHandler")
         SocketServer.BaseRequestHandler.__init__(self, request,
@@ -12,13 +16,15 @@ class EchoRequestHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         # Echo back to the client
-        data = self.request.recv(1024)
-        self.logger.debug("received msg: %s", data)
-        self.request.send(data)
+        self.data = self.request.recv(1024).strip()
+        self.logger.debug("received msg: %s", self.data)
+        self.request.send(self.data)
 
 if __name__ == '__main__':
-    address = ('localhost', 8888)
-
-    server = SocketServer.TCPServer(address, EchoRequestHandler)
-
-    server.serve_forever()
+    try:
+        server = SocketServer.TCPServer((HOST,PORT), InstantMessageHandler)
+        print "[+] Started pyconnect server"
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print "\n[+] Keyboard interrupt, shutting down"
+        server.socket.close()
