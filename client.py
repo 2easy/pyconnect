@@ -13,30 +13,31 @@ PORT = 8888
 MENU = '1. create user\n2. login\n3. logout\n4. send message\n5. quit'
 ##################################################
 # main loop
-try:
-    while True:
-        #connect to the server
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((HOST,PORT))
-        print MENU
+while True:
+    print MENU
+    try:
         opt = int(input("num: "))
-        if   opt == 1:
-            msg = Request(0,0,CREATE_USER)
-        elif opt == 5: break
-        else:
-            message = raw_input('---> ')
-            msg = Request(0,1,FORWARD,message)
+    except:
+        opt = 0
+    if   opt == 1:
+        msg = Request(0,0,CREATE_USER)
+    elif opt == 5:
+        msg = Request(0,0,LOGOUT)
+    else:
+        message = raw_input('---> ')
+        msg = Request(0,1,FORWARD,message)
 
-        #logger.debug('sending data: %s', message)
-        #print msg.to_s()
+    #connect to the server
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST,PORT))
+    #logger.debug('sending data: %s', message)
+    #print msg.to_s()
 
-        if opt != 5:
-            len_sent = s.send(msg.to_s())
-            response = s.recv(1024)
-            print 'server response ' + response
-        s.close()
-finally:
-    # clean up
-    logger.debug('closing socket')
+    #len_sent = s.send(msg.to_s())
+    s.send(msg.to_s())
+    response = s.recv(1024)
+    #print 'server response ' + response
+    #j = raw_input()
+    s.shutdown(socket.SHUT_WR)
     s.close()
-    logger.debug('done')
+    if opt == 5: break
