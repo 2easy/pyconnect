@@ -3,6 +3,7 @@
 import socket
 import sys
 from request import Request
+from protocol import *
 
 import logging
 logging.basicConfig(level=logging.DEBUG,format='%(name)s: %(message)s',)
@@ -20,18 +21,19 @@ try:
         print MENU
         opt = int(input("num: "))
         if   opt == 1:
-            msg = Request(0,0,0)
+            msg = Request(0,0,CREATE_USER)
         elif opt == 5: break
         else:
             message = raw_input('---> ')
-            msg = Request(0,1,3,message)
+            msg = Request(0,1,FORWARD,message)
 
         #logger.debug('sending data: %s', message)
-        print msg.to_s()
+        #print msg.to_s()
 
         if opt != 5:
             len_sent = s.send(msg.to_s())
             response = s.recv(1024)
+            print 'server response ' + response
         s.close()
 finally:
     # clean up

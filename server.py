@@ -2,6 +2,7 @@
 ############### Imports and globals ##############
 import SocketServer
 from request import Request
+from protocol import *
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -18,12 +19,25 @@ class InstantMessageHandler(SocketServer.BaseRequestHandler):
                                                  server)
 
     def handle(self):
-        # Echo back to the client
+        # receive the data
         self.data = self.request.recv(1024).strip().split(',')
-        if len(self.data) < 4: return
         self.logger.debug("received msg: %s", self.data)
-        req = Request(self.data[0],self.data[1],self.data[2], self.data[3])
-        self.request.send(req.msg)
+        req = Request(*self.data)
+        print req.to_s()
+        # process request
+        if req.req_type == FORWARD:
+            self.request.send(str(req.req_type))
+        elif req.req_type == LOGIN:
+            self.request.send(str(req.req_type))
+        elif req.req_type == LOGOUT:
+            self.request.send(str(req.req_type))
+        elif req.req_type == CREATE_USER:
+            self.request.send(str(req.req_type))
+        elif req.req_type == DELETE_USER:
+            self.request.send(str(req.req_type))
+        elif req.not_valid():
+            self.logger.debug("received invalid request - dropped")
+            return
 
 if __name__ == '__main__':
     try:
