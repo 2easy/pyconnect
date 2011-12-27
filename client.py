@@ -5,6 +5,14 @@ import sys
 from request import Request
 from protocol import *
 
+import sqlite3
+usr_db = sqlite3.connect('usr.sqlite')
+c = usr_db.cursor()
+try:
+    c.execute('create Table Users (User_id int, Pass text)')
+except sqlite3.OperationalError: pass
+usr_db.commit()
+
 import logging
 logging.basicConfig(level=logging.DEBUG,format='%(name)s: %(message)s',)
 logger = logging.getLogger('client')
@@ -20,7 +28,12 @@ while True:
     except:
         opt = 0
     if   opt == 1:
-        msg = Request(0,0,CREATE_USER)
+        while True:
+            password = raw_input("Password: ")
+            confirm  = raw_input("Confirm : ")
+            if password == confirm: break
+            else: print "Misstyped, try again."
+        msg = Request(0,0,CREATE_USER,password)
     elif opt == 5:
         msg = Request(0,0,LOGOUT)
     else:
@@ -36,7 +49,16 @@ while True:
     #len_sent = s.send(msg.to_s())
     s.send(msg.to_s())
     resp = Request(*s.recv(1024).strip().split(','))
-    print 'server response ' + resp.msg
+    if resp.req_type == CREATE_USER:
+        print "resp.dst_id: " + str(resp.dst_id)
+        c.execute('insert into Users values (?,"")', (resp.dst_id,))
+        usr_db.commit()
+        #for us in c.execute('select * from Users'):
+        #    print us
+        print resp.msg
+        print "Your ID is " + resp.dst_id
+    elif resp.req_type == INVALID:
+        print resp.msg
     s.shutdown(socket.SHUT_WR)
     s.close()
     if opt == 5: break
