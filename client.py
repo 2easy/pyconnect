@@ -35,9 +35,8 @@ while True:
 
     #len_sent = s.send(msg.to_s())
     s.send(msg.to_s())
-    response = s.recv(1024)
-    #print 'server response ' + response
-    #j = raw_input()
+    resp = Request(*s.recv(1024).strip().split(','))
+    print 'server response ' + resp.msg
     s.shutdown(socket.SHUT_WR)
     s.close()
     if opt == 5: break
