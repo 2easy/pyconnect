@@ -25,13 +25,18 @@ class Menu():
         self.display()
     def next_opt(self):
         self.curr_opt = (self.curr_opt + 1) % len(self.options)
+        self.update()
     def prev_opt(self):
         if self.curr_opt > 0: self.curr_opt -= 1
         else: self.curr_opt = self.last_opt
+        self.update()
     def display(self):
         # create nice menu label
         x = (self.width-len(" MENU "))/2
         self.win.addstr(0,x," MENU ")
+        self.update()
+        self.win.noutrefresh()
+    def update(self):
         # fill menu with supplied options
         i = 0
         for o in self.options:
