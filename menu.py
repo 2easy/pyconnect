@@ -18,7 +18,7 @@ class Menu():
         self.win.box(0,0)
         # fill it with the given options
         self.curr_opt = 0
-        self.last     = len(options)-1
+        self.last_opt = len(options)-1
         i = 1
         for o in options:
             if (i-1 == self.curr_opt):
@@ -27,5 +27,17 @@ class Menu():
                 self.win.addstr(i,1,o)
             i+=1
         self.options  = options
+    def next_opt(self):
+        self.curr_opt = (self.curr_opt + 1) % len(self.options)
+    def prev_opt(self):
+        if self.curr_opt > 0: self.curr_opt -= 1
+        else: self.curr_opt = self.last_opt
     def display(self):
+        i = 1
+        for o in self.options:
+            if (i-1 == self.curr_opt):
+                self.win.addstr(i,1,o,curses.A_STANDOUT)
+            else:
+                self.win.addstr(i,1,o)
+            i+=1
         self.win.refresh()
