@@ -83,7 +83,7 @@ class LabeledWindow(object):
     def update_coords(self):
         y,x = self.get_coords()
         self.win.mvwin(y,x)
-
+        self.win.nooutrefresh()
     def update_label(self, label = ""):
         self.label = label
         self.win.box(0,0)
@@ -94,16 +94,20 @@ class LabeledWindow(object):
         self.win.noutrefresh()
 
 class Notification(LabeledWindow):
-    def __init__(self, max_x = 0, max_y = 0, label = "", message = ""):
-        super(Notification,self).__init__(max_x,max_y,label, message)
+    def __init__(self, max_y = 0, max_x = 0, label = "", message = ""):
+        super(Notification,self).__init__(max_y,max_x,label, message)
         self.message = self.content
     def update_contents(self, label = "", msg = ""):
-        pass
-        #self.set_size(content)
-        #self.update_coords()
-        #self.update_label(label)
-        # update the notification messgae
-        #self.win.move(2,2)
+        self.set_size(msg)
+        self.update_coords()
+        self.update_label(label)
+        # update the notification message
+        nrows = self.height - LabeledWindow.padding - 1
+        for i in range(nrows):
+            self.win.addstr(2,2+i,msg[i*self.width:(i+1)*self.width])
+        i = nrows
+        self.win.addstr(2,2+nrows, msg[(nrows)*self.width:])
+        self.win.noutrefresh()
 
 class Prompt(LabeledWindow):
     def __init__(self, max_x = 0, max_y = 0, label = "", content = ""):
