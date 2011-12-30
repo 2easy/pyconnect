@@ -23,11 +23,11 @@ def main(scr):
     max_y,max_x = scr.getmaxyx()
 
     #scr.addstr(0,0,str(max_x)+" "+str(max_y))
-    m = Menu(max_x,max_y,["1. "+msg.Menu.login,
+    m = Menu(max_y,max_x,["1. "+msg.Menu.login,
                           "2. "+msg.Menu.add_user,
                           "3. "+msg.Menu.create_user,
                           "4. "+msg.Menu.exit])
-    prompt = Prompt(max_x,max_y)
+    prompt = Prompt(max_y,max_x)
     ################################################3
     #tmp_win = curses.newwin(5, 60, 5, 10)
     #tb = curses.textpad.Textbox(tmp_win)
@@ -74,7 +74,7 @@ def main(scr):
                 p[1].hide()
                 p[2].top()
                 curses.panel.update_panels()
-                cli = UserClient(prompt.val)
+                cli = UserClient(prompt.content)
                 if cli.request_server_create():
                     cli.save_to_db()
                 #    # tell user that everything is fine

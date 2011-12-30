@@ -5,7 +5,7 @@ class Menu():
     # menu paddings
     h_pad = 2 + 1
     v_pad = 1 + 1
-    def __init__(self, max_x=0,max_y=0, options = []):
+    def __init__(self, max_y=0,max_x=0, options = []):
         curses.initscr()
         #determining height and width
         self.width = 0
@@ -52,22 +52,38 @@ class Menu():
 class WindowTooBigException(BaseException): pass
 class LabeledWindow(object):
     padding = 4
-    def __init__(self, max_x = 0, max_y = 0, label = "", content = ""):
+    def __init__(self, max_y = 0, max_x = 0, label = "", content = ""):
+        self.max_y = max_y
+        self.max_x = max_x
         curses.initscr()
         self.content = content
-        self.width   = max_x / 2
-        self.height  = LabeledWindow.padding
-        if len(self.content) == 0:
-            self.height += 1
-        else:
-            self.height  += len(content) / (self.width-LabeledWindow.padding)
-        if self.height > max_y: raise WindowTooBigException("Too much content")
+        self.height, self.width = self.get_size(content)
         # create window
-        x = (max_x - self.width)/2
-        y = (max_y - self.height)/2
+        y,x = self.get_coords()
         self.win    = curses.newwin(self.height,self.width,y,x)
         self.win.keypad(1)
         self.update_label(label)
+    def get_size(self,content):
+        width  = self.max_x / 2
+        height = LabeledWindow.padding
+        if len(self.content) == 0:
+            height += 1
+        else:
+            height += len(content) / (width-LabeledWindow.padding)
+        if height > self.max_y:
+            raise WindowTooBigException("Too much content")
+        else:
+            return height,width
+    def set_size(self,content):
+        self.height, self.width = self.get_size(content)
+        self.win.resize(self.height,self.width)
+        self.win.nooutrefresh()
+    def get_coords(self):
+        return ( (self.max_y - self.height)/2 , (self.max_x - self.width)/2 )
+    def update_coords(self):
+        y,x = self.get_coords()
+        self.win.mvwin(y,x)
+
     def update_label(self, label = ""):
         self.label = label
         self.win.box(0,0)
@@ -77,11 +93,23 @@ class LabeledWindow(object):
         self.win.addstr(0,m_x,menu_label)
         self.win.noutrefresh()
 
+class Notification(LabeledWindow):
+    def __init__(self, max_x = 0, max_y = 0, label = "", message = ""):
+        super(Notification,self).__init__(max_x,max_y,label, message)
+        self.message = self.content
+    def update_contents(self, label = "", msg = ""):
+        pass
+        #self.set_size(content)
+        #self.update_coords()
+        #self.update_label(label)
+        # update the notification messgae
+        #self.win.move(2,2)
+
 class Prompt(LabeledWindow):
-    def __init__(self, max_x = 0, max_y = 0, label = "", val = ""):
-        super(type(self),self).__init__(max_x,max_y,label,val)
+    def __init__(self, max_x = 0, max_y = 0, label = "", content = ""):
+        super(Prompt,self).__init__(max_x,max_y,label,content)
     def user_for(self, subject, obfucate = False):
-        self.val = ""
+        self.content = ""
         self.update_label(subject)
         self.win.move(2,2)
         c,i = '',0
@@ -90,14 +118,14 @@ class Prompt(LabeledWindow):
         while True:
             c = self.win.getch()
             if 32 < c < 126:
-                self.val += chr(c)
+                self.content += chr(c)
                 if obfucate: self.win.addch(2,2+i,'*')
                 else: self.win.addch(2,2+i,chr(c))
                 i += 1
                 self.win.move(2,2+i)
                 self.win.refresh()
             elif c == curses.KEY_BACKSPACE and i > 0:
-                self.val = self.val[:-1]
+                self.content = self.content[:-1]
                 i -= 1
                 self.win.addch(2,2+i," ")
                 self.win.move(2,2+i)
