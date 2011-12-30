@@ -49,20 +49,26 @@ class Menu():
             i+=1
         self.win.refresh()
 
-class Prompt():
-    height = 5
-    def __init__(self, max_x = 0, max_y = 0, label = "", val = ""):
+class WindowTooBigException(BaseException): pass
+class LabeledWindow(object):
+    padding = 4
+    def __init__(self, max_x = 0, max_y = 0, label = "", content = ""):
         curses.initscr()
-        self.width  = max_x / 2
-        self.height = Prompt.height
-        self.label  = label
-        self.val    = val
+        self.content = content
+        self.width   = max_x / 2
+        self.height  = LabeledWindow.padding
+        if len(self.content) == 0:
+            self.height += 1
+        else:
+            self.height  += len(content) / (self.width-LabeledWindow.padding)
+        if self.height > max_y: raise WindowTooBigException("Too much content")
+        # create window
         x = (max_x - self.width)/2
         y = (max_y - self.height)/2
         self.win    = curses.newwin(self.height,self.width,y,x)
         self.win.keypad(1)
-        self.update()
-    def update(self, label = ""):
+        self.update_label(label)
+    def update_label(self, label = ""):
         self.label = label
         self.win.box(0,0)
         # create nice menu label
@@ -70,9 +76,13 @@ class Prompt():
         m_x = (self.width-len(menu_label))/2
         self.win.addstr(0,m_x,menu_label)
         self.win.noutrefresh()
+
+class Prompt(LabeledWindow):
+    def __init__(self, max_x = 0, max_y = 0, label = "", val = ""):
+        super(type(self),self).__init__(max_x,max_y,label,val)
     def user_for(self, subject, obfucate = False):
         self.val = ""
-        self.update(subject)
+        self.update_label(subject)
         self.win.move(2,2)
         c,i = '',0
         curses.noecho()
