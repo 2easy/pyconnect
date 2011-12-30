@@ -1,4 +1,5 @@
 import curses
+import msg
 
 class Menu():
     # menu paddings
@@ -32,8 +33,9 @@ class Menu():
         self.update()
     def display(self):
         # create nice menu label
-        x = (self.width-len(" MENU "))/2
-        self.win.addstr(0,x," MENU ")
+        menu_label = " " + msg.Menu.menu + " "
+        x = (self.width-len(menu_label))/2
+        self.win.addstr(0,x,menu_label)
         self.update()
         self.win.noutrefresh()
     def update(self):
@@ -46,3 +48,51 @@ class Menu():
                 self.win.addstr(Menu.v_pad+i,Menu.h_pad,o)
             i+=1
         self.win.refresh()
+
+class Prompt():
+    height = 5
+    def __init__(self, max_x = 0, max_y = 0, label = "", val = ""):
+        curses.initscr()
+        self.width  = max_x / 2
+        self.height = Prompt.height
+        self.label  = label
+        self.val    = val
+        x = (max_x - self.width)/2
+        y = (max_y - self.height)/2
+        self.win    = curses.newwin(self.height,self.width,y,x)
+        self.win.keypad(1)
+        self.update()
+    def update(self, label = ""):
+        self.label = label
+        self.win.box(0,0)
+        # create nice menu label
+        menu_label = " " + self.label + " "
+        m_x = (self.width-len(menu_label))/2
+        self.win.addstr(0,m_x,menu_label)
+        self.win.noutrefresh()
+    def user_for(self, subject, obfucate = False):
+        self.val = ""
+        self.update(subject)
+        self.win.move(2,2)
+        c,i = '',0
+        curses.noecho()
+        curses.curs_set(1)
+        while True:
+            c = self.win.getch()
+            if 32 < c < 126:
+                self.val += chr(c)
+                if obfucate: self.win.addch(2,2+i,'*')
+                else: self.win.addch(2,2+i,chr(c))
+                i += 1
+                self.win.move(2,2+i)
+                self.win.refresh()
+            elif c == curses.KEY_BACKSPACE and i > 0:
+                self.val = self.val[:-1]
+                i -= 1
+                self.win.addch(2,2+i," ")
+                self.win.move(2,2+i)
+            elif c == curses.KEY_ENTER:
+                self.win.addstr(2,2," "*i)
+                break
+        curses.curs_set(0)
+        curses.echo()
