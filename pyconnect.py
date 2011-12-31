@@ -13,6 +13,7 @@ from client import UserClient
 
 def main(scr):
     # Init curses
+    # aleready done by curses wrapper so ommited LATER REMOVE
     #scr = curses.initscr()
     #scr.keypad(1)
 
@@ -37,14 +38,13 @@ def main(scr):
     #scr.addstr(1,1,text.encode('utf_8'))
     #scr.addstr(0,0,str(dir(entry)))
     ################################################
-    p = []
-    p.append(curses.panel.new_panel(scr))
-    p.append(curses.panel.new_panel(prompt.win))
-    p.append(curses.panel.new_panel(note.win))
-    p.append(curses.panel.new_panel(m.win))
+    scr_p = curses.panel.new_panel(scr)
+    prompt_p = curses.panel.new_panel(prompt.win)
+    note_p = curses.panel.new_panel(note.win)
+    menu_p = curses.panel.new_panel(m.win)
     # hide prompt and notification windows
-    p[1].hide()
-    p[2].hide()
+    prompt_p.hide()
+    note_p.hide()
     curses.panel.update_panels()
     scr.refresh()
     m.display()
@@ -56,12 +56,12 @@ def main(scr):
         if   key == curses.KEY_UP:   m.prev_opt()
         elif key == curses.KEY_DOWN: m.next_opt()
         elif key == curses.KEY_ESCAPE:
-            if p[3].hidden():
-                p[3].show()
+            if menu_p.hidden():
+                menu_p.show()
                 curses.noecho()
                 curses.curs_set(0)
             else:
-                p[3].hide()
+                menu_p.hide()
                 curses.echo()
                 curses.curs_set(1)
             curses.panel.update_panels()
@@ -69,34 +69,34 @@ def main(scr):
             #scr.addstr(2,0,str(m.curr_opt))
             if m.curr_opt == 0: pass
             elif m.curr_opt == 1:
-                p[1].top()
-                p[1].show()
+                prompt_p.top()
+                prompt_p.show()
                 curses.panel.update_panels()
                 prompt.user_for("User ID",False)
-                p[1].hide()
+                prompt_p.hide()
                 curses.panel.update_panels()
-
+                # TODO validate num
                 cli = UserClient("",int(prompt.content))
                 cli.save_to_db()
                 succ_msg = "Your account ID is: " + str(cli.usr_id)
                 note.update_contents("Success!", succ_msg)
-                p[2].top()
-                p[2].show()
+                note_p.top()
+                note_p.show()
                 curses.panel.update_panels()
                 curses.doupdate()
                 scr.getch()
 
-                p[2].hide()
-                p[3].top()
+                note_p.hide()
+                menu.top()
                 curses.panel.update_panels()
 
             elif m.curr_opt == 2:
                 # prompt user for password
-                p[1].top()
-                p[1].show()
+                prompt_p.top()
+                prompt_p.show()
                 curses.panel.update_panels()
                 prompt.user_for("Password",True)
-                p[1].hide()
+                prompt_p.hide()
                 curses.panel.update_panels()
 
                 cli = UserClient(prompt.content)
@@ -104,14 +104,14 @@ def main(scr):
                     cli.save_to_db()
                 succ_msg = "Your account ID is: " + str(cli.usr_id)
                 note.update_contents("Success!", succ_msg)
-                p[2].top()
-                p[2].show()
+                note_p.top()
+                note_p.show()
                 curses.panel.update_panels()
                 curses.doupdate()
                 scr.getch()
 
-                p[2].hide()
-                p[3].top()
+                note_p.hide()
+                menu_p.top()
                 curses.panel.update_panels()
             elif m.curr_opt == 3: break
         curses.doupdate()

@@ -47,9 +47,9 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             # try creating a user
             usr_id = self.create_user(req.msg)
             if usr_id > 0:
-                resp = Request(SERVER_ID,usr_id,CREATE_USER,msg.rgst.succ)
+                resp = Request(SERVER_ID,usr_id,CREATE_USER,msg.Rgst.succ)
             else:
-                resp = Request(SERVER_ID,0,ERROR,msg.rgst.failed)
+                resp = Request(SERVER_ID,0,ERROR,msg.Rgst.failed)
             self.request.send(resp.to_s())
             #for us in c.execute('select * from Users'):
             #    self.logger.debug("%s",us)

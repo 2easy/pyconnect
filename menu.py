@@ -41,9 +41,11 @@ class Menu():
     def update(self):
         # fill menu with supplied options
         i = 0
+        # for debuuging REMOVE LATER
+        self.win.addstr(1,1,str(curses.version),curses.A_REVERSE)
         for o in self.options:
             if (i == self.curr_opt):
-                self.win.addstr(Menu.v_pad+i,Menu.h_pad,o,curses.A_STANDOUT)
+                self.win.addstr(Menu.v_pad+i,Menu.h_pad,o,curses.A_REVERSE)
             else:
                 self.win.addstr(Menu.v_pad+i,Menu.h_pad,o)
             i+=1
