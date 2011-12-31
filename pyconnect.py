@@ -67,7 +67,18 @@ def main(scr):
             curses.panel.update_panels()
         elif key == curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
-            if m.curr_opt == 0: pass
+            if m.curr_opt == 0:
+                prompt_p.top()
+                prompt_p.show()
+                curses.panel.update_panels()
+                prompt.user_for("User ID",False)
+                usr_id = prompt.content
+                prompt.user_for("Password",True)
+                usr_pass = prompt.content
+                prompt_p.hide()
+                cli = UserClient(usr_pass,int(usr_id))
+                cli.login()
+                # login user method
             elif m.curr_opt == 1:
                 prompt_p.top()
                 prompt_p.show()
@@ -116,4 +127,5 @@ def main(scr):
             elif m.curr_opt == 3: break
         curses.doupdate()
 
+# Main loop in curses wrapper
 curses.wrapper(main)

@@ -1,3 +1,9 @@
+# server constants
+PORT = 8888
+SERVER_ID = 0
+# client constants
+#LOGGED_OUT = False
+#LOGGED_IN = True
 # message types
 CREATE_USER = 0
 DELETE_USER = 1

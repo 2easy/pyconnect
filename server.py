@@ -21,8 +21,6 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(name)s: %(message)s')
 logger = logging.getLogger('client')
 HOST = ''
-PORT = 8888
-SERVER_ID = 0
 ##################################################
 class RequestHandler(SocketServer.BaseRequestHandler):
     def __init__(self, request, client_addr, server):
@@ -40,7 +38,15 @@ class RequestHandler(SocketServer.BaseRequestHandler):
         if req.req_type == FORWARD:
             self.request.send(str(req.req_type))
         elif req.req_type == LOGIN:
-            self.request.send(str(req.req_type))
+            #self.request.send(str(req.req_type))
+            # TODO do NOT store cleartext passwords
+            if self.valid_password(req.src_id,req.msg):
+                PyConnectServer.logged_users.append(req.src_id)
+                self.logger.debug("user %s logged in", req.src_id)
+                resp = Request(SERVER_ID,req.src_id,LOGIN,msg.Login.succ)
+            else:
+                resp = Request(SERVER_ID,req.src_id,INVALID,msg.Login.failed)
+            self.request.send(resp.to_s())
         elif req.req_type == LOGOUT:
             self.request.send(str(req.req_type))
         elif req.req_type == CREATE_USER:
@@ -65,8 +71,17 @@ class RequestHandler(SocketServer.BaseRequestHandler):
         except:
             return -1
         return c.lastrowid
+    def valid_password(self, uid, password):
+        #try:
+        #c.execute('select * from Users where Id = (?) and Pass = (?)',
+        #            (uid, password))
+        #usr_db.commit()
+        #except:
+        #    return False
+        return True
 
 class PyConnectServer(SocketServer.TCPServer):
+    logged_users = []
     def __init__(self,server_address,handler_class = RequestHandler):
         self.logger = logging.getLogger("PyConnectServer")
         SocketServer.TCPServer.__init__(self,server_address,handler_class)

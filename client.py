@@ -40,6 +40,21 @@ class UserClient():
             self.usr_id = resp.dst_id
             return True
         else: return False
+    def login(self):
+        msg = Request(self.usr_id, SERVER_ID, LOGIN,self.password)
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((HOST,PORT))
+            s.send(msg.to_s())
+            resp = Request(*s.recv(1024).strip().split(','))
+            s.shutdown(socket.SHUT_WR)
+            s.close()
+        except: return False
+        # validate server respond
+        if resp.req_type == LOGIN:
+            self.logged_in = True
+            return True
+        else: return False
     def save_to_db(self):
         # TODO remembering password
         if self.usr_id == -1: return False

@@ -8,3 +8,6 @@ class Menu:
 class Rgst:
     succ = "Registration successful :)"
     failed = "Registration failed, please don't try to break anything"
+class Login:
+    succ = "Login succesful :)"
+    failed = "Login failed, user id or password invalid"
