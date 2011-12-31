@@ -77,8 +77,19 @@ def main(scr):
                 usr_pass = prompt.content
                 prompt_p.hide()
                 cli = UserClient(usr_pass,int(usr_id))
-                cli.login()
-                # login user method
+                if cli.login():
+                    note.update_contents("Success!",msg.Login.succ)
+                else:
+                    note.update_contents("Login failed",msg.Login.failed)
+                note_p.top()
+                note_p.show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                scr.getch()
+
+                note_p.hide()
+                menu_p.top()
+                curses.panel.update_panels()
             elif m.curr_opt == 1:
                 prompt_p.top()
                 prompt_p.show()

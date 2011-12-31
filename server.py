@@ -4,7 +4,7 @@ import sqlite3
 usr_db = sqlite3.connect('users.sqlite')
 c = usr_db.cursor()
 try:
-    c.execute('create Table Users (Pass text)')
+    c.execute('create Table Users (pass text)')
 except sqlite3.OperationalError: pass
 usr_db.commit()
 
@@ -41,10 +41,13 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             #self.request.send(str(req.req_type))
             # TODO do NOT store cleartext passwords
             if self.valid_password(req.src_id,req.msg):
-                PyConnectServer.logged_users.append(req.src_id)
+                if req.src_id not in PyConnectServer.logged_users:
+                    PyConnectServer.logged_users.append(req.src_id)
+                self.logger.debug(PyConnectServer.logged_users)
                 self.logger.debug("user %s logged in", req.src_id)
                 resp = Request(SERVER_ID,req.src_id,LOGIN,msg.Login.succ)
             else:
+                self.logger.debug("user %s FAILED to log in", req.src_id)
                 resp = Request(SERVER_ID,req.src_id,INVALID,msg.Login.failed)
             self.request.send(resp.to_s())
         elif req.req_type == LOGOUT:
@@ -66,19 +69,20 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             return
     def create_user(self, password):
         try:
-            c.execute('insert into Users values (?)', (password,))
+            c.execute('insert into users values (?)', (password,))
             usr_db.commit()
         except:
             return -1
         return c.lastrowid
     def valid_password(self, uid, password):
-        #try:
-        #c.execute('select * from Users where Id = (?) and Pass = (?)',
-        #            (uid, password))
-        #usr_db.commit()
-        #except:
-        #    return False
-        return True
+        try:
+            c.execute('select * from users where rowid = (?)', (uid,))
+            (saved_pass,) = c.fetchone()
+            #self.logger.debug(str(saved_pass))
+            if saved_pass != password: return False
+            else: return True
+        except:
+            return False
 
 class PyConnectServer(SocketServer.TCPServer):
     logged_users = []
