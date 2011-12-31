@@ -57,7 +57,7 @@ def main(scr):
         elif key == curses.KEY_DOWN: m.next_opt()
         elif key == curses.KEY_ESCAPE:
             if p[3].hidden():
-                p1.show()
+                p[3].show()
                 curses.noecho()
                 curses.curs_set(0)
             else:
@@ -68,7 +68,28 @@ def main(scr):
         elif key == curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
             if m.curr_opt == 0: pass
-            elif m.curr_opt == 1: pass
+            elif m.curr_opt == 1:
+                p[1].top()
+                p[1].show()
+                curses.panel.update_panels()
+                prompt.user_for("User ID",False)
+                p[1].hide()
+                curses.panel.update_panels()
+
+                cli = UserClient("",int(prompt.content))
+                cli.save_to_db()
+                succ_msg = "Your account ID is: " + str(cli.usr_id)
+                note.update_contents("Success!", succ_msg)
+                p[2].top()
+                p[2].show()
+                curses.panel.update_panels()
+                curses.doupdate()
+                scr.getch()
+
+                p[2].hide()
+                p[3].top()
+                curses.panel.update_panels()
+
             elif m.curr_opt == 2:
                 # prompt user for password
                 p[1].top()
@@ -92,9 +113,6 @@ def main(scr):
                 p[2].hide()
                 p[3].top()
                 curses.panel.update_panels()
-
-                #    # tell user that everything is fine
-                #    # and return to main menu
             elif m.curr_opt == 3: break
         curses.doupdate()
 
