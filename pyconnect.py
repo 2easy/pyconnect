@@ -8,8 +8,6 @@ import menu_actions
 
 import locale
 
-from client import UserClient
-
 def main(scr):
     curses.curs_set(0) #turn off the cursor
 
@@ -35,21 +33,21 @@ def main(scr):
     #scr.addstr(1,1,text.encode('utf_8'))
     #scr.addstr(0,0,str(dir(entry)))
     ################################################
-    scr_p = curses.panel.new_panel(scr)
-    prompt_p = curses.panel.new_panel(prompt.win)
-    note_p = curses.panel.new_panel(note.win)
-    m_logged_p = curses.panel.new_panel(m_logged.win)
-    menu_p = curses.panel.new_panel(m.win)
-    panels = dict([('scr',scr_p),('prompt',prompt_p),('note',note_p),
-                   ('menu',menu_p),('m_logged', m_logged_p)])
-    panels["scr"].set_userptr(scr)
-    panels["prompt"].set_userptr(prompt)
-    panels["note"].set_userptr(note)
-    panels["m_logged"].set_userptr(m_logged)
+    panels = {'scr'      : curses.panel.new_panel(scr),
+              'prompt'   : curses.panel.new_panel(prompt.win),
+              'note'     : curses.panel.new_panel(note.win),
+              'm_logged' : curses.panel.new_panel(m_logged.win),
+              'menu'     : curses.panel.new_panel(m.win)
+             }
+    panels['scr'].set_userptr(scr)
+    panels['prompt'].set_userptr(prompt)
+    panels['note'].set_userptr(note)
+    panels['m_logged'].set_userptr(m_logged)
+    panels['menu'].set_userptr(m)
     # hide prompt and notification windows
-    prompt_p.hide()
-    note_p.hide()
-    m_logged_p.hide()
+    panels['prompt'].hide()
+    panels['note'].hide()
+    panels['m_logged'].hide()
     curses.panel.update_panels()
     scr.refresh()
     m.display()
@@ -72,12 +70,9 @@ def main(scr):
             curses.panel.update_panels()
         elif key == curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
-            if m.curr_opt == 0:
-                menu_actions.login(panels)
-            elif m.curr_opt == 1:
-                menu_actions.add_user(panels)
-            elif m.curr_opt == 2:
-                menu_actions.create_user(panels)
+            if m.curr_opt == 0:   menu_actions.login(panels)
+            elif m.curr_opt == 1: menu_actions.add_user(panels)
+            elif m.curr_opt == 2: menu_actions.create_user(panels)
             elif m.curr_opt == 3: break
         curses.doupdate()
 
