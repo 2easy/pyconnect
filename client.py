@@ -22,7 +22,8 @@ PORT = 8888
 ##################################################
 class UserClient():
     def __init__(self, password = "", usr_id = 0):
-        self.usr_id = usr_id
+        try: self.usr_id = int(usr_id)
+        except: return
         self.password = password
     def request_server_create(self):
         msg = Request(0,0,CREATE_USER,self.password)

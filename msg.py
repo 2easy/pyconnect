@@ -11,3 +11,4 @@ class Rgst:
 class Login:
     succ = "Login succesful :)"
     failed = "Login failed, user id or password invalid"
+    invalid_uid = "Your User ID is invalid, must be integer"

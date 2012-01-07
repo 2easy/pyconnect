@@ -102,6 +102,7 @@ class Notification(LabeledWindow):
     def update_contents(self, label = "", msg = ""):
         self.set_size(msg)
         self.update_coords()
+        self.win.clear()
         self.update_label(label)
         # update the notification message
         nrows = self.height - LabeledWindow.padding - 1

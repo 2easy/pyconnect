@@ -72,11 +72,26 @@ def main(scr):
                 prompt_p.show()
                 curses.panel.update_panels()
                 prompt.user_for("User ID",False)
-                usr_id = prompt.content
+                try:
+                    usr_id = int(prompt.content)
+                except:
+                    note.update_contents("Wrong User ID",msg.Login.invalid_uid)
+                    note_p.top()
+                    note_p.show()
+                    curses.panel.update_panels()
+                    curses.doupdate()
+                    scr.getch()
+
+                    note_p.hide()
+                    menu_p.top()
+                    curses.panel.update_panels()
+                    scr.refresh()
+                    curses.doupdate()
+                    continue
                 prompt.user_for("Password",True)
                 usr_pass = prompt.content
                 prompt_p.hide()
-                cli = UserClient(usr_pass,int(usr_id))
+                cli = UserClient(usr_pass,usr_id)
                 if cli.login():
                     note.update_contents("Success!",msg.Login.succ)
                 else:
@@ -109,7 +124,7 @@ def main(scr):
                 scr.getch()
 
                 note_p.hide()
-                menu.top()
+                menu_p.top()
                 curses.panel.update_panels()
 
             elif m.curr_opt == 2:

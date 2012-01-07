@@ -69,6 +69,7 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             return
     def create_user(self, password):
         try:
+            if password == '': return -1
             c.execute('insert into users values (?)', (password,))
             usr_db.commit()
         except:
@@ -76,7 +77,7 @@ class RequestHandler(SocketServer.BaseRequestHandler):
         return c.lastrowid
     def valid_password(self, uid, password):
         try:
-            c.execute('select * from users where rowid = (?)', (uid,))
+            c.execute('select pass from users where rowid = (?)', (uid,))
             (saved_pass,) = c.fetchone()
             #self.logger.debug(str(saved_pass))
             if saved_pass != password: return False
