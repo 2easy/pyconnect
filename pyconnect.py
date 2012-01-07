@@ -56,17 +56,17 @@ def main(scr):
     key = None
     while True:
         key = scr.getch()
-        scr.addstr(1,0,str("kurwa"))
+        #scr.addstr(1,0,str("ble"))
         #scr.addstr(2,0,str(key))
         if   key == curses.KEY_UP:   m.prev_opt()
         elif key == curses.KEY_DOWN: m.next_opt()
         elif key == curses.KEY_ESCAPE:
-            if menu_p.hidden():
-                menu_p.show()
+            if panels['menu'].hidden():
+                panels['menu'].show()
                 curses.noecho()
                 curses.curs_set(0)
             else:
-                menu_p.hide()
+                panels['menu'].hide()
                 curses.echo()
                 curses.curs_set(1)
             curses.panel.update_panels()
@@ -75,49 +75,9 @@ def main(scr):
             if m.curr_opt == 0:
                 menu_actions.login(panels)
             elif m.curr_opt == 1:
-                prompt_p.top()
-                prompt_p.show()
-                curses.panel.update_panels()
-                prompt.user_for("User ID",False)
-                prompt_p.hide()
-                curses.panel.update_panels()
-                # TODO validate num
-                cli = UserClient("",int(prompt.content))
-                cli.save_to_db()
-                succ_msg = "Your account ID is: " + str(cli.usr_id)
-                note.update_contents("Success!", succ_msg)
-                note_p.top()
-                note_p.show()
-                curses.panel.update_panels()
-                curses.doupdate()
-                scr.getch()
-
-                note_p.hide()
-                menu_p.top()
-                curses.panel.update_panels()
+                menu_actions.add_user(panels)
             elif m.curr_opt == 2:
-                # prompt user for password
-                prompt_p.top()
-                prompt_p.show()
-                curses.panel.update_panels()
-                prompt.user_for("Password",True)
-                prompt_p.hide()
-                curses.panel.update_panels()
-
-                cli = UserClient(prompt.content)
-                if cli.request_server_create():
-                    cli.save_to_db()
-                succ_msg = "Your account ID is: " + str(cli.usr_id)
-                note.update_contents("Success!", succ_msg)
-                note_p.top()
-                note_p.show()
-                curses.panel.update_panels()
-                curses.doupdate()
-                scr.getch()
-
-                note_p.hide()
-                menu_p.top()
-                curses.panel.update_panels()
+                menu_actions.create_user(panels)
             elif m.curr_opt == 3: break
         curses.doupdate()
 
