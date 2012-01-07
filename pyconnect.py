@@ -6,19 +6,13 @@ import curses.textpad
 curses.KEY_ENTER = 10
 curses.KEY_ESCAPE = 27
 from menu import Menu,Prompt,Notification
+import menu_actions
 
 import msg
 
 from client import UserClient
 
 def main(scr):
-    # Init curses
-    # aleready done by curses wrapper so ommited LATER REMOVE
-    #scr = curses.initscr()
-    #scr.keypad(1)
-
-    #curses.cbreak()
-    #curses.noecho()
     curses.curs_set(0) #turn off the cursor
 
     max_y,max_x = scr.getmaxyx()
@@ -28,9 +22,14 @@ def main(scr):
                           "2. "+msg.Menu.add_user,
                           "3. "+msg.Menu.create_user,
                           "4. "+msg.Menu.exit])
+    m_logged = Menu(max_y,max_x,["1. "+msg.Menu.send_msg,
+                                 "2. "+msg.Menu.add_buddy,
+                                 "3. "+msg.Menu.remove_buddy,
+                                 "4. "+msg.Menu.logout,
+                                 "5. "+msg.Menu.exit])
     prompt = Prompt(max_y,max_x)
     note   = Notification(max_y,max_x)
-    ################################################3
+    ################################################
     #tmp_win = curses.newwin(5, 60, 5, 10)
     #tb = curses.textpad.Textbox(tmp_win)
     #text = tb.edit()
@@ -41,10 +40,18 @@ def main(scr):
     scr_p = curses.panel.new_panel(scr)
     prompt_p = curses.panel.new_panel(prompt.win)
     note_p = curses.panel.new_panel(note.win)
+    m_logged_p = curses.panel.new_panel(m_logged.win)
     menu_p = curses.panel.new_panel(m.win)
+    panels = dict([('scr',scr_p),('prompt',prompt_p),('note',note_p),
+                   ('m_logged', m_logged_p)])
+    panels["scr"].set_userptr(scr)
+    panels["prompt"].set_userptr(prompt)
+    panels["note"].set_userptr(note)
+    panels["m_logged"].set_userptr(m_logged)
     # hide prompt and notification windows
     prompt_p.hide()
     note_p.hide()
+    m_logged_p.hide()
     curses.panel.update_panels()
     scr.refresh()
     m.display()
@@ -68,43 +75,7 @@ def main(scr):
         elif key == curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
             if m.curr_opt == 0:
-                prompt_p.top()
-                prompt_p.show()
-                curses.panel.update_panels()
-                prompt.user_for("User ID",False)
-                try:
-                    usr_id = int(prompt.content)
-                except:
-                    note.update_contents("Wrong User ID",msg.Login.invalid_uid)
-                    note_p.top()
-                    note_p.show()
-                    curses.panel.update_panels()
-                    curses.doupdate()
-                    scr.getch()
-
-                    note_p.hide()
-                    menu_p.top()
-                    curses.panel.update_panels()
-                    scr.refresh()
-                    curses.doupdate()
-                    continue
-                prompt.user_for("Password",True)
-                usr_pass = prompt.content
-                prompt_p.hide()
-                cli = UserClient(usr_pass,usr_id)
-                if cli.login():
-                    note.update_contents("Success!",msg.Login.succ)
-                else:
-                    note.update_contents("Login failed",msg.Login.failed)
-                note_p.top()
-                note_p.show()
-                curses.panel.update_panels()
-                curses.doupdate()
-                scr.getch()
-
-                note_p.hide()
-                menu_p.top()
-                curses.panel.update_panels()
+                menu_actions.login(panels)
             elif m.curr_opt == 1:
                 prompt_p.top()
                 prompt_p.show()
@@ -126,7 +97,6 @@ def main(scr):
                 note_p.hide()
                 menu_p.top()
                 curses.panel.update_panels()
-
             elif m.curr_opt == 2:
                 # prompt user for password
                 prompt_p.top()
