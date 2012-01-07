@@ -1,5 +1,5 @@
 import curses
-import msg
+import locale
 
 class Menu():
     # menu paddings
@@ -33,7 +33,7 @@ class Menu():
         self.update()
     def display(self):
         # create nice menu label
-        menu_label = " " + msg.Menu.menu + " "
+        menu_label = " " + locale.Menu.menu + " "
         x = (self.width-len(menu_label))/2
         self.win.addstr(0,x,menu_label)
         self.update()

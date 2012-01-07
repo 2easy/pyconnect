@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-import curses
-import curses.panel
-import curses.textpad
+import curses, curses.panel
 
 curses.KEY_ENTER = 10
 curses.KEY_ESCAPE = 27
-from menu import Menu,Prompt,Notification
+from windows import Menu,Prompt,Notification
 import menu_actions
 
-import msg
+import locale
 
 from client import UserClient
 
@@ -18,15 +16,15 @@ def main(scr):
     max_y,max_x = scr.getmaxyx()
 
     #scr.addstr(0,0,str(max_x)+" "+str(max_y))
-    m = Menu(max_y,max_x,["1. "+msg.Menu.login,
-                          "2. "+msg.Menu.add_user,
-                          "3. "+msg.Menu.create_user,
-                          "4. "+msg.Menu.exit])
-    m_logged = Menu(max_y,max_x,["1. "+msg.Menu.send_msg,
-                                 "2. "+msg.Menu.add_buddy,
-                                 "3. "+msg.Menu.remove_buddy,
-                                 "4. "+msg.Menu.logout,
-                                 "5. "+msg.Menu.exit])
+    m = Menu(max_y,max_x,["1. "+locale.Menu.login,
+                          "2. "+locale.Menu.add_user,
+                          "3. "+locale.Menu.create_user,
+                          "4. "+locale.Menu.exit])
+    m_logged = Menu(max_y,max_x,["1. "+locale.Menu.send_msg,
+                                 "2. "+locale.Menu.add_buddy,
+                                 "3. "+locale.Menu.remove_buddy,
+                                 "4. "+locale.Menu.logout,
+                                 "5. "+locale.Menu.exit])
     prompt = Prompt(max_y,max_x)
     note   = Notification(max_y,max_x)
     ################################################
@@ -43,7 +41,7 @@ def main(scr):
     m_logged_p = curses.panel.new_panel(m_logged.win)
     menu_p = curses.panel.new_panel(m.win)
     panels = dict([('scr',scr_p),('prompt',prompt_p),('note',note_p),
-                   ('m_logged', m_logged_p)])
+                   ('menu',menu_p),('m_logged', m_logged_p)])
     panels["scr"].set_userptr(scr)
     panels["prompt"].set_userptr(prompt)
     panels["note"].set_userptr(note)
@@ -58,7 +56,7 @@ def main(scr):
     key = None
     while True:
         key = scr.getch()
-        #scr.addstr(1,0,str(curses.KEY_UP))
+        scr.addstr(1,0,str("kurwa"))
         #scr.addstr(2,0,str(key))
         if   key == curses.KEY_UP:   m.prev_opt()
         elif key == curses.KEY_DOWN: m.next_opt()

@@ -3,7 +3,7 @@
 import socket
 import sys
 from request import Request
-from protocol import *
+from proto_consts import *
 
 import sqlite3
 usr_db = sqlite3.connect('usr.sqlite')

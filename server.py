@@ -13,8 +13,8 @@ from sys import exit
 import SocketServer
 from socket import SHUT_RDWR
 from request import Request
-from protocol import *
-import msg
+from proto_consts import *
+import locale
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -45,10 +45,10 @@ class RequestHandler(SocketServer.BaseRequestHandler):
                     PyConnectServer.logged_users.append(req.src_id)
                 self.logger.debug(PyConnectServer.logged_users)
                 self.logger.debug("user %s logged in", req.src_id)
-                resp = Request(SERVER_ID,req.src_id,LOGIN,msg.Login.succ)
+                resp = Request(SERVER_ID,req.src_id,LOGIN,locale.Login.succ)
             else:
                 self.logger.debug("user %s FAILED to log in", req.src_id)
-                resp = Request(SERVER_ID,req.src_id,INVALID,msg.Login.failed)
+                resp = Request(SERVER_ID,req.src_id,INVALID,locale.Login.failed)
             self.request.send(resp.to_s())
         elif req.req_type == LOGOUT:
             self.request.send(str(req.req_type))
@@ -56,9 +56,9 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             # try creating a user
             usr_id = self.create_user(req.msg)
             if usr_id > 0:
-                resp = Request(SERVER_ID,usr_id,CREATE_USER,msg.Rgst.succ)
+                resp = Request(SERVER_ID,usr_id,CREATE_USER,locale.Rgst.succ)
             else:
-                resp = Request(SERVER_ID,0,ERROR,msg.Rgst.failed)
+                resp = Request(SERVER_ID,0,INVALID,locale.Rgst.failed)
             self.request.send(resp.to_s())
             #for us in c.execute('select * from Users'):
             #    self.logger.debug("%s",us)

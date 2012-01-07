@@ -1,4 +1,6 @@
-import curses, curses.panel
+import curses
+import locale
+
 def login(panels):
     scr = panels["scr"].userptr()
     prompt = panels["prompt"].userptr()
@@ -11,7 +13,7 @@ def login(panels):
     try:
         usr_id = int(prompt.content)
     except:
-        note.update_contents("Wrong User ID",msg.Login.invalid_uid)
+        note.update_contents("Wrong User ID",locale.Login.invalid_uid)
         panels["note"].top()
         panels["note"].show()
         curses.panel.update_panels()
@@ -29,9 +31,9 @@ def login(panels):
     panels["prompt"].hide()
     cli = UserClient(usr_pass,usr_id)
     if cli.login():
-        note.update_contents("Success!",msg.Login.succ)
+        note.update_contents("Success!",locale.Login.succ)
     else:
-        note.update_contents("Login failed",msg.Login.failed)
+        note.update_contents("Login failed",locale.Login.failed)
     panels["note"].top()
     panels["note"].show()
     curses.panel.update_panels()
