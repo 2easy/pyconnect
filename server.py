@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 ############### Imports and globals ##############
-import sqlite3
-usr_db = sqlite3.connect('users.sqlite')
-c = usr_db.cursor()
-try:
-    c.execute('create Table Users (pass text)')
-except sqlite3.OperationalError: pass
-usr_db.commit()
+from server_db import ServerDBAgent
+db = ServerDBAgent('users.sqlite', ['create table users (pass text)'])
 
 from sys import exit
 
@@ -68,22 +63,13 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             self.logger.debug("received invalid request - dropped")
             return
     def create_user(self, password):
-        try:
-            if password == '': return -1
-            c.execute('insert into users values (?)', (password,))
-            usr_db.commit()
-        except:
-            return -1
-        return c.lastrowid
+        if password == '': return -1
+        else: return db.save_user(password)
     def valid_password(self, uid, password):
-        try:
-            c.execute('select pass from users where rowid = (?)', (uid,))
-            (saved_pass,) = c.fetchone()
-            #self.logger.debug(str(saved_pass))
-            if saved_pass != password: return False
-            else: return True
-        except:
-            return False
+        saved_pass = db.fetch_password(uid)
+        #self.logger.debug(str(saved_pass))
+        if saved_pass != password: return False
+        else: return True
 
 class PyConnectServer(SocketServer.TCPServer):
     logged_users = []

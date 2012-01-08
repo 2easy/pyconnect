@@ -3,9 +3,10 @@
 import sys, socket
 from request import Request
 
-import cli_db
-db = cli_db.DBAgent('cli_db.sqlite')
-
+from cli_db import ClientDBAgent
+db = ClientDBAgent('cli_db.sqlite',
+                   ['create table users (user_id int, pass text)']
+                  )
 from proto_consts import *
 ##################################################
 class UserClient():
@@ -14,15 +15,15 @@ class UserClient():
         except: return
         self.password = password
     def send(self,msg):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((HOST,PORT))
-            s.send(msg.to_s())
-            resp = Request(*s.recv(1024).strip().split(','))
-            s.shutdown(socket.SHUT_WR)
-            s.close()
-            return resp
-        except: return None
+        #try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST,PORT))
+        s.send(msg.to_s())
+        resp = Request(*s.recv(1024).strip().split(','))
+        s.shutdown(socket.SHUT_WR)
+        s.close()
+        return resp
+        #except: return None
     def request_server_create(self):
         msg = Request(0,0,CREATE_USER,self.password)
         # send create request to the server
