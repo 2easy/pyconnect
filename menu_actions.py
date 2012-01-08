@@ -14,6 +14,7 @@ def login(panels):
     try:
         usr_id = int(prompt.content)
     except:
+        panels['prompt'].hide()
         note.update_contents(locale.Login.wrong_uid,locale.Login.invalid_uid)
         panels['note'].top()
         panels['note'].show()
@@ -24,8 +25,6 @@ def login(panels):
         panels['note'].hide()
         panels['menu'].top()
         cs_wrap.curses.panel.update_panels()
-        scr.refresh()
-        cs_wrap.curses.doupdate()
         return
     prompt.user_for('Password',True)
     usr_pass = prompt.content
