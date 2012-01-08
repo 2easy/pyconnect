@@ -1,4 +1,5 @@
 # server constants
+HOST = ''
 PORT = 8888
 SERVER_ID = 0
 # client constants

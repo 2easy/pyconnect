@@ -57,9 +57,12 @@ def add_user(panels):
     curses.panel.update_panels()
     # TODO validate num
     cli = UserClient('',int(prompt.content))
-    cli.save_to_db()
-    succ_msg = 'Your account ID is: ' + str(cli.usr_id)
-    note.update_contents('Success!', succ_msg)
+    if cli.save_to_db():
+        succ_msg = 'Your account ID is: ' + str(cli.usr_id)
+        note.update_contents('Success!', succ_msg)
+    else:
+        fail_msg = "ERROR"
+        note.update_contents('Failed!', fail_msg)
     panels['note'].top()
     panels['note'].show()
     curses.panel.update_panels()

@@ -1,24 +1,12 @@
 #!/usr/bin/env python
 ############### Imports and globals ##############
-import socket
-import sys
+import sys, socket
 from request import Request
+
+import cli_db
+db = cli_db.DBAgent('cli_db.sqlite')
+
 from proto_consts import *
-
-import sqlite3
-usr_db = sqlite3.connect('usr.sqlite')
-c = usr_db.cursor()
-try:
-    c.execute('create Table Users (User_id int, Pass text)')
-except sqlite3.OperationalError: pass
-usr_db.commit()
-
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(name)s: %(message)s',)
-logger = logging.getLogger('client')
-HOST = ''
-PORT = 8888
 ##################################################
 class UserClient():
     def __init__(self, password = "", usr_id = 0):
@@ -53,12 +41,5 @@ class UserClient():
             return True
         else: return False
     def save_to_db(self):
-        # TODO remember password
         if self.usr_id == -1: return False
-        try:
-            c.execute('insert into Users values (?,?)',
-                    (self.usr_id,self.password))
-            usr_db.commit()
-        except: return False
-        # if everything went well...
-        return True
+        return db.save_user(self.usr_id,self.password)
