@@ -34,7 +34,7 @@ def login(panels):
     if cli.login():
         note.update_contents(locale.Login.success,locale.Login.succ_msg)
     else:
-        note.update_contents(failure,locale.Login.failed_msg)
+        note.update_contents(locale.Login.failure,locale.Login.failed_msg)
     panels['note'].top()
     panels['note'].show()
     cs_wrap.curses.panel.update_panels()
@@ -53,7 +53,7 @@ def add_user(panels):
     panels['prompt'].top()
     panels['prompt'].show()
     cs_wrap.curses.panel.update_panels()
-    prompt.user_for(user_id,False)
+    prompt.user_for(locale.AddAcc.user_id,False)
     panels['prompt'].hide()
     cs_wrap.curses.panel.update_panels()
     # TODO validate num
