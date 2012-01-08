@@ -1,17 +1,18 @@
 #!/usr/bin/env python
-import curses, curses.panel
+import curses_wrapper as cs_wrap
+cs = cs_wrap.CursesWrapper()
 
-curses.KEY_ENTER = 10
-curses.KEY_ESCAPE = 27
+cs_wrap.curses.KEY_ENTER = 10
+cs_wrap.curses.KEY_ESCAPE = 27
 from windows import Menu,Prompt,Notification
 import menu_actions
 
 import locale
 
-def main(scr):
-    curses.curs_set(0) #turn off the cursor
+def main():
+    cs_wrap.curses.curs_set(0) #turn off the cursor
 
-    max_y,max_x = scr.getmaxyx()
+    max_y,max_x = cs.scr.getmaxyx()
 
     #scr.addstr(0,0,str(max_x)+" "+str(max_y))
     m = Menu(max_y,max_x,["1. "+locale.Menu.login,
@@ -33,13 +34,13 @@ def main(scr):
     #scr.addstr(1,1,text.encode('utf_8'))
     #scr.addstr(0,0,str(dir(entry)))
     ################################################
-    panels = {'scr'      : curses.panel.new_panel(scr),
-              'prompt'   : curses.panel.new_panel(prompt.win),
-              'note'     : curses.panel.new_panel(note.win),
-              'm_logged' : curses.panel.new_panel(m_logged.win),
-              'menu'     : curses.panel.new_panel(m.win)
+    panels = {'scr'      : cs_wrap.curses.panel.new_panel(cs.scr),
+              'prompt'   : cs_wrap.curses.panel.new_panel(prompt.win),
+              'note'     : cs_wrap.curses.panel.new_panel(note.win),
+              'm_logged' : cs_wrap.curses.panel.new_panel(m_logged.win),
+              'menu'     : cs_wrap.curses.panel.new_panel(m.win)
              }
-    panels['scr'].set_userptr(scr)
+    panels['scr'].set_userptr(cs.scr)
     panels['prompt'].set_userptr(prompt)
     panels['note'].set_userptr(note)
     panels['m_logged'].set_userptr(m_logged)
@@ -48,33 +49,32 @@ def main(scr):
     panels['prompt'].hide()
     panels['note'].hide()
     panels['m_logged'].hide()
-    curses.panel.update_panels()
-    scr.refresh()
+    cs_wrap.curses.panel.update_panels()
+    cs.scr.refresh()
     m.display()
     key = None
     while True:
-        key = scr.getch()
+        key = cs.scr.getch()
         #scr.addstr(1,0,str("ble"))
         #scr.addstr(2,0,str(key))
-        if   key == curses.KEY_UP:   m.prev_opt()
-        elif key == curses.KEY_DOWN: m.next_opt()
-        elif key == curses.KEY_ESCAPE:
-            if panels['menu'].hidden():
-                panels['menu'].show()
-                curses.noecho()
-                curses.curs_set(0)
-            else:
-                panels['menu'].hide()
-                curses.echo()
-                curses.curs_set(1)
-            curses.panel.update_panels()
-        elif key == curses.KEY_ENTER:
+        if   key == cs_wrap.curses.KEY_UP:   m.prev_opt()
+        elif key == cs_wrap.curses.KEY_DOWN: m.next_opt()
+        elif key == cs_wrap.curses.KEY_ESCAPE: pass
+        elif key == cs_wrap.curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
             if m.curr_opt == 0:   menu_actions.login(panels)
             elif m.curr_opt == 1: menu_actions.add_user(panels)
             elif m.curr_opt == 2: menu_actions.create_user(panels)
             elif m.curr_opt == 3: break
-        curses.doupdate()
+        cs_wrap.curses.doupdate()
+        cs.scr.refresh()
 
 # Main loop in curses wrapper
-curses.wrapper(main)
+try:
+    cs_wrap.curses.cbreak()
+    cs.scr.keypad(1)
+    main()
+except BaseException, msg:
+    print(msg)
+finally:
+    cs_wrap.curses.endwin()

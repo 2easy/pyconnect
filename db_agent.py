@@ -8,7 +8,7 @@ class DBAgent(object):
             self.c = self.usr_db.cursor()
             try:
                 for cmd in init_cmds:
-                    self.c.execute(cmd)#'create Table Users (User_id int, Pass text)')
+                    self.c.execute(cmd)
             except sqlite3.DatabaseError, msg:
                 print msg
             self.usr_db.commit()

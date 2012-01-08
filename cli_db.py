@@ -9,7 +9,5 @@ class ClientDBAgent(DBAgent):
         try:
             self.c.execute('insert into Users values (?,?)', (uid , password))
             self.usr_db.commit()
-        except sqlite.OperationalError, msg: return False
-        # if everything went well...
-        return True
-
+            return True
+        except sqlite.OperationalError: return False

@@ -11,15 +11,15 @@ from proto_consts import *
 ##################################################
 class UserClient():
     def __init__(self, password = "", usr_id = 0):
-        try: self.usr_id = int(usr_id)
-        except: return
+        self.usr_id = int(usr_id)
         self.password = password
     def send(self,msg):
         #try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((HOST,PORT))
         s.send(msg.to_s())
-        resp = Request(*s.recv(1024).strip().split(','))
+        resp_t = s.recv(1024).strip().split(',')
+        resp = Request(*resp_t[0:4])
         s.shutdown(socket.SHUT_WR)
         s.close()
         return resp

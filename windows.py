@@ -1,4 +1,6 @@
-import curses
+import curses_wrapper as cs_wrap
+cs = cs_wrap.CursesWrapper()
+
 import locale
 
 class Menu():
@@ -6,7 +8,6 @@ class Menu():
     h_pad = 2 + 1
     v_pad = 1 + 1
     def __init__(self, max_y=0,max_x=0, options = []):
-        curses.initscr()
         #determining height and width
         self.width = 0
         for o in options:
@@ -17,7 +18,7 @@ class Menu():
         x = (max_x - self.width)/2
         y = (max_y - self.height)/2
         # create menu window
-        self.win = curses.newwin(self.height,self.width,y,x)
+        self.win = cs.create_window(self.height,self.width,y,x)
         self.win.box(0,0)
         # fill it with the given options
         self.curr_opt = 0
@@ -42,10 +43,11 @@ class Menu():
         # fill menu with supplied options
         i = 0
         # for debuuging REMOVE LATER
-        self.win.addstr(1,1,str(curses.version),curses.A_REVERSE)
+        #self.win.addstr(1,1,str(curses.version),curses.A_REVERSE)
         for o in self.options:
             if (i == self.curr_opt):
-                self.win.addstr(Menu.v_pad+i,Menu.h_pad,o,curses.A_REVERSE)
+                self.win.addstr(Menu.v_pad+i,Menu.h_pad,o,
+                                cs_wrap.curses.A_REVERSE)
             else:
                 self.win.addstr(Menu.v_pad+i,Menu.h_pad,o)
             i+=1
@@ -57,12 +59,11 @@ class LabeledWindow(object):
     def __init__(self, max_y = 0, max_x = 0, label = "", content = ""):
         self.max_y = max_y
         self.max_x = max_x
-        curses.initscr()
         self.content = content
         self.height, self.width = self.get_size(content)
         # create window
         y,x = self.get_coords()
-        self.win    = curses.newwin(self.height,self.width,y,x)
+        self.win = cs.create_window(self.height,self.width,y,x)
         self.win.keypad(1)
         self.update_label(label)
     def get_size(self,content):
@@ -120,8 +121,8 @@ class Prompt(LabeledWindow):
         self.update_label(subject)
         self.win.move(2,2)
         c,i = '',0
-        curses.noecho()
-        curses.curs_set(1)
+        cs_wrap.curses.noecho()
+        cs_wrap.curses.curs_set(1)
         while True:
             c = self.win.getch()
             if 32 < c < 126:
@@ -131,13 +132,13 @@ class Prompt(LabeledWindow):
                 i += 1
                 self.win.move(2,2+i)
                 self.win.refresh()
-            elif c == curses.KEY_BACKSPACE and i > 0:
+            elif c == cs_wrap.curses.KEY_BACKSPACE and i > 0:
                 self.content = self.content[:-1]
                 i -= 1
                 self.win.addch(2,2+i," ")
                 self.win.move(2,2+i)
-            elif c == curses.KEY_ENTER:
+            elif c == cs_wrap.curses.KEY_ENTER:
                 self.win.addstr(2,2," "*i)
                 break
-        curses.curs_set(0)
-        curses.echo()
+        cs_wrap.curses.curs_set(0)
+        cs_wrap.curses.echo()

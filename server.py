@@ -67,6 +67,7 @@ class RequestHandler(SocketServer.BaseRequestHandler):
         else: return db.save_user(password)
     def valid_password(self, uid, password):
         saved_pass = db.fetch_password(uid)
+        if saved_pass == '': return False
         #self.logger.debug(str(saved_pass))
         if saved_pass != password: return False
         else: return True
