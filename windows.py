@@ -7,11 +7,15 @@ class Menu():
     # menu paddings
     h_pad = 2 + 1
     v_pad = 1 + 1
-    def __init__(self, max_y=0,max_x=0, options = []):
-        #determining height and width
+    def __init__(self, max_y=0,max_x=0, options = [], label = locale.Menu.menu):
+        self.label = label
+        self.max_y = max_y
+        self.max_x = max_x
+        # determining height and width
         self.width = 0
         for o in options:
             if len(o) > self.width: self.width = len(o)
+        if len(self.label) > self.width: self.width = len(self.label)
         self.width  += Menu.h_pad*2
         self.height = len(options) + Menu.v_pad*2
         # get center coordinates
@@ -19,6 +23,7 @@ class Menu():
         y = (max_y - self.height)/2
         # create menu window
         self.win = cs.create_window(self.height,self.width,y,x)
+        self.win.keypad(1)
         self.win.box(0,0)
         # fill it with the given options
         self.curr_opt = 0
@@ -32,10 +37,22 @@ class Menu():
         if self.curr_opt > 0: self.curr_opt -= 1
         else: self.curr_opt = self.last_opt
         self.update()
+    def update_size(self,label):
+        if len(label) > self.width:
+            self.width = len(label)+Menu.h_pad*2
+            self.win.resize(self.height,self.width)
+        x = (self.max_x - self.width)/2
+        y = (self.max_y - self.height)/2
+        self.win.mvwin(y,x)
+        self.win.clear()
+        self.win.box(0,0)
+        self.win.nooutrefresh()
     def display(self):
         # create nice menu label
-        menu_label = " " + locale.Menu.menu + " "
+        self.update_size(self.label+"  ")
+        menu_label = " " + self.label + " "
         x = (self.width-len(menu_label))/2
+#        if self.label == locale.Account.q_remember_pass: raise BaseException(self.width)
         self.win.addstr(0,x,menu_label)
         self.update()
         self.win.noutrefresh()

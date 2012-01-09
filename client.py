@@ -5,14 +5,16 @@ from request import Request
 
 from cli_db import ClientDBAgent
 db = ClientDBAgent('cli_db.sqlite',
-                   ['create table users (user_id int, pass text)']
+                   ['create table users (alias text, user_id int, pass text)']
                   )
 from proto_consts import *
 ##################################################
-class UserClient():
-    def __init__(self, password = "", usr_id = 0):
-        self.usr_id = int(usr_id)
+class UserClient(object):
+    def __init__(self, password = '', usr_id = 0, alias = 'noone'):
         self.password = password
+        self.usr_id   = int(usr_id)
+        self.alias    = alias
+
     def send(self,msg):
         #try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,13 +36,19 @@ class UserClient():
             return True
         else: return False
     def login(self):
-        msg = Request(self.usr_id, SERVER_ID, LOGIN,self.password)
+        msg = Request(self.usr_id, SERVER_ID, LOGIN, self.password)
         resp = self.send(msg)
         # validate server respond
         if resp and resp.req_type == LOGIN:
             self.logged_in = True
             return True
         else: return False
-    def save_to_db(self):
+    def save_to_db(self,save_pass):
         if self.usr_id == -1: return False
-        return db.save_user(self.usr_id,self.password)
+        if save_pass:
+            return db.save_user(self.alias,self.usr_id,self.password)
+        else:
+            return db.save_user(self.alias,self.usr_id,'')
+    @classmethod
+    def fetch_all(self):
+        return db.fetch_all()

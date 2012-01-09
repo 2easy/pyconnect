@@ -16,14 +16,15 @@ def main():
 
     #scr.addstr(0,0,str(max_x)+" "+str(max_y))
     m = Menu(max_y,max_x,["1. "+locale.Menu.login,
-                          "2. "+locale.Menu.add_user,
-                          "3. "+locale.Menu.create_user,
-                          "4. "+locale.Menu.exit])
+                          "2. "+locale.Menu.create_user,
+                          "3. "+locale.Menu.exit])
     m_logged = Menu(max_y,max_x,["1. "+locale.Menu.send_msg,
                                  "2. "+locale.Menu.add_buddy,
                                  "3. "+locale.Menu.remove_buddy,
                                  "4. "+locale.Menu.logout,
                                  "5. "+locale.Menu.exit])
+    bool_menu = Menu(max_y,max_x,[locale.General.no,locale.General.yes],
+                     locale.Account.q_save)
     prompt = Prompt(max_y,max_x)
     note   = Notification(max_y,max_x)
     ################################################
@@ -36,17 +37,20 @@ def main():
     ################################################
     panels = {'scr'      : cs_wrap.curses.panel.new_panel(cs.scr),
               'prompt'   : cs_wrap.curses.panel.new_panel(prompt.win),
+              'bool_menu': cs_wrap.curses.panel.new_panel(bool_menu.win),
               'note'     : cs_wrap.curses.panel.new_panel(note.win),
               'm_logged' : cs_wrap.curses.panel.new_panel(m_logged.win),
               'menu'     : cs_wrap.curses.panel.new_panel(m.win)
              }
     panels['scr'].set_userptr(cs.scr)
     panels['prompt'].set_userptr(prompt)
+    panels['bool_menu'].set_userptr(bool_menu)
     panels['note'].set_userptr(note)
     panels['m_logged'].set_userptr(m_logged)
     panels['menu'].set_userptr(m)
     # hide prompt and notification windows
     panels['prompt'].hide()
+    panels['bool_menu'].hide()
     panels['note'].hide()
     panels['m_logged'].hide()
     cs_wrap.curses.panel.update_panels()
@@ -62,10 +66,9 @@ def main():
         elif key == cs_wrap.curses.KEY_ESCAPE: pass
         elif key == cs_wrap.curses.KEY_ENTER:
             #scr.addstr(2,0,str(m.curr_opt))
-            if m.curr_opt == 0:   menu_actions.login(panels)
-            elif m.curr_opt == 1: menu_actions.add_user(panels)
-            elif m.curr_opt == 2: menu_actions.create_user(panels)
-            elif m.curr_opt == 3: break
+            if   m.curr_opt == 0: menu_actions.login(panels)
+            elif m.curr_opt == 1: menu_actions.create_user(panels)
+            elif m.curr_opt == 2: break
         cs_wrap.curses.doupdate()
         cs.scr.refresh()
 
