@@ -117,34 +117,6 @@ def login(panels):
     panels['m_logged'].show()
     cs_wrap.curses.panel.update_panels()
 
-def add_user(panels): pass
-#    scr = panels['scr'].userptr()
-#    prompt = panels['prompt'].userptr()
-#    note = panels['note'].userptr()
-#
-#    panels['prompt'].top()
-#    panels['prompt'].show()
-#    cs_wrap.curses.panel.update_panels()
-#    prompt.user_for(locale.Account.user_id,False)
-#    panels['prompt'].hide()
-#    cs_wrap.curses.panel.update_panels()
-#    # TODO validate num
-#    cli = UserClient('',int(prompt.content),)
-#    if cli.save_to_db():
-#        succ_msg = locale.Account.your_acc_id_is +" "+ str(cli.usr_id)
-#        note.update_contents(locale.Account.success, succ_msg)
-#    else:
-#        note.update_contents(locale.Account.failure, locale.Account.db_error)
-#    panels['note'].top()
-#    panels['note'].show()
-#    cs_wrap.curses.panel.update_panels()
-#    cs_wrap.curses.doupdate()
-#    scr.getch()
-#
-#    panels['note'].hide()
-#    panels['menu'].top()
-#    cs_wrap.curses.panel.update_panels()
-
 def create_user(panels):
     scr    = panels['scr'].userptr()
     prompt = panels['prompt'].userptr()
