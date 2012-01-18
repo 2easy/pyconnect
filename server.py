@@ -36,6 +36,7 @@ class RequestHandler(SocketServer.BaseRequestHandler):
             #self.request.send(str(req.req_type))
             # TODO do NOT store cleartext passwords
             if self.valid_password(req.src_id,req.msg):
+                # TODO possible data race
                 if req.src_id not in PyConnectServer.logged_users:
                     PyConnectServer.logged_users.append(req.src_id)
                 self.logger.debug(PyConnectServer.logged_users)
@@ -73,7 +74,7 @@ class RequestHandler(SocketServer.BaseRequestHandler):
         if saved_pass != password: return False
         else: return True
 
-class PyConnectServer(SocketServer.TCPServer):
+class PyConnectServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     logged_users = []
     def __init__(self,server_address,handler_class = RequestHandler):
         self.logger = logging.getLogger("PyConnectServer")
