@@ -8,6 +8,8 @@ from windows import Menu,Prompt,Notification
 from twisted.internet import reactor
 import menu_actions
 
+from screen import Screen
+
 import locale
 
 def main():
@@ -47,7 +49,7 @@ def main():
     panels['note'].set_userptr(note)
     panels['m_logged'].set_userptr(m_logged)
     panels['menu'].set_userptr(m)
-    screen = cs_wrap.Screen(cs.scr,panels)
+    screen = Screen(cs.scr,panels)
     # hide prompt and notification windows
     panels['prompt'].hide()
     panels['bool_menu'].hide()

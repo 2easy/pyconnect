@@ -45,7 +45,7 @@ def get_decision(menu_p):
         elif key == cs_wrap.curses.KEY_ENTER: break
         cs_wrap.curses.panel.update_panels()
         cs_wrap.curses.doupdate()
-    # hide bool menu
+    # hide menu
     menu_p.below().top()
     menu_p.hide()
     cs_wrap.curses.panel.update_panels()
