@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 import curses_wrapper as cs_wrap
 cs = cs_wrap.CursesWrapper()
-
 cs_wrap.curses.KEY_ENTER = 10
 cs_wrap.curses.KEY_ESCAPE = 27
 from windows import Menu,Prompt,Notification
+
+from twisted.internet import reactor
 import menu_actions
 
 import locale
 
 def main():
-    cs_wrap.curses.curs_set(0) #turn off the cursor
-
     max_y,max_x = cs.scr.getmaxyx()
 
     #scr.addstr(0,0,str(max_x)+" "+str(max_y))
@@ -48,6 +47,7 @@ def main():
     panels['note'].set_userptr(note)
     panels['m_logged'].set_userptr(m_logged)
     panels['menu'].set_userptr(m)
+    screen = cs_wrap.Screen(cs.scr,panels)
     # hide prompt and notification windows
     panels['prompt'].hide()
     panels['bool_menu'].hide()
@@ -56,28 +56,11 @@ def main():
     cs_wrap.curses.panel.update_panels()
     cs.scr.refresh()
     m.display()
-    key = None
-    while True:
-        key = cs.scr.getch()
-        #scr.addstr(1,0,str("ble"))
-        #scr.addstr(2,0,str(key))
-        if   key == cs_wrap.curses.KEY_UP:   m.prev_opt()
-        elif key == cs_wrap.curses.KEY_DOWN: m.next_opt()
-        elif key == cs_wrap.curses.KEY_ESCAPE: pass
-        elif key == cs_wrap.curses.KEY_ENTER:
-            #scr.addstr(2,0,str(m.curr_opt))
-            if   m.curr_opt == 0: menu_actions.login(panels)
-            elif m.curr_opt == 1: menu_actions.create_user(panels)
-            elif m.curr_opt == 2: break
-        cs_wrap.curses.doupdate()
-        cs.scr.refresh()
 
+    reactor.addReader(screen)
+    reactor.run()
+    screen.close()
 # Main loop in curses wrapper
-try:
-    cs_wrap.curses.cbreak()
-    cs.scr.keypad(1)
-    main()
-except BaseException, msg:
-    print(msg)
-finally:
-    cs_wrap.curses.endwin()
+try:     main()
+except BaseException, msg: print(msg)
+finally: cs_wrap.curses.endwin()
