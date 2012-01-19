@@ -7,7 +7,6 @@ from windows import Menu,Prompt,Notification
 
 from twisted.internet import reactor
 import menu_actions
-
 from screen import Screen
 
 import locale

@@ -13,7 +13,7 @@ class Screen(CursesStdIO):
     def __init__(self, scr, panels):
         self.scr = scr
         self.panels = panels
-
+        # curses initialization
         self.scr.nodelay(1)
         cs_wrap.curses.cbreak()
         self.scr.keypad(1)

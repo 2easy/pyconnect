@@ -3,6 +3,7 @@ from proto_consts import INVALID
 
 class Request():
     def __init__(self, src_id=0, dst_id=0, req_type=INVALID, msg=''):
+        # TODO validation
         self.src_id   = int(src_id)
         self.dst_id   = int(dst_id)
         self.req_type = int(req_type)

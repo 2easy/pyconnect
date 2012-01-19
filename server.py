@@ -13,7 +13,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(name)s: %(message)s')
 logger = logging.getLogger('client')
-HOST = ''
 ######################################################
 from twisted.internet import reactor, protocol
 from twisted.protocols import basic
@@ -21,18 +20,32 @@ from twisted.protocols import basic
 class IMProtocol(basic.LineReceiver):
     def connectionMade(self):
         print "Client connected"
-        self.factory.clients.append(self)
     def connectionLost(self, reason):
-        self.factory.clients.remove(self)
+        print "Client disconnected"
     def lineReceived(self, line):
         print "received",repr(line)
-        print str(self.factory.clients)
+        req = Request(*line.split(',')[0:4])
+        if req.req_type == FORWARD:
+            for c in self.factory.clients:
+                if c != self: c.transport.write(line+'\n')
+        elif req.req_type == LOGIN:
+            print "user logged in"
+            self.factory.clients.append(self)
+            resp = Request(SERVER_ID, req.src_id, LOGIN, locale.Login.success)
+            self.transport.write(resp.to_s())
+        elif req.req_type == LOGOUT:
+            print "user logged out"
+            self.factory.clients.remove(self)
+            resp = Request(SERVER_ID, req.src_id, LOGOUT, locale.Login.success)
+            self.transport.write(resp.to_s())
+            self.transport.loseConnection()
+        elif req.req_type == CREATE_USER:
+            # TODO
+            pass
         if line == 'quit':
             self.sendLine("Goodbye.")
             self.transport.loseConnection()
             return
-        for c in self.factory.clients:
-            c.transport.write(line+'\n')
 
 class IMServerFactory(protocol.ServerFactory):
     clients  = []
