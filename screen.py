@@ -29,7 +29,6 @@ class Screen(CursesStdIO):
         cs_wrap.curses.endwin()
     def doRead(self):
         cs_wrap.curses.noecho()
-        m = self.panels['menu'].userptr()
 
         opt_id = menu_actions.get_decision(self.panels['menu'])
 

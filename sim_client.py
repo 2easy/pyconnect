@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from twisted.internet import stdio, reactor, protocol
 from twisted.protocols import basic
 
@@ -33,11 +34,5 @@ class StdioProxyFactory(protocol.ClientFactory):
         reactor.stop()
 
 if __name__ == "__main__":
-    import sys
-
-    if not len(sys.argv) == 3:
-        print "Usage: %s host port" % __file__
-        sys.exit(1)
-
-    reactor.connectTCP(sys.argv[1], int(sys.argv[2]), StdioProxyFactory())
+    reactor.connectTCP("127.0.0.1", 8888, StdioProxyFactory())
     reactor.run()

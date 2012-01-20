@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 ############### Imports and globals ##############
+from twisted.internet import protocol
 import sys, socket
 from request import Request
 
@@ -9,6 +10,30 @@ db = ClientDBAgent('cli_db.sqlite',
                   )
 from proto_consts import *
 ##################################################
+class IMClient(protocol.Protocol):
+    def __init__(self, password = '', usr_id = 0, alias = 'noone', scr_obj):
+        self.password = password
+        self.usr_id   = int(usr_id)
+        self.alias    = alias
+        self.scr_obj  = scr_obj
+        self.scr_obj.proto = self
+    def connectionMade(self):
+        self.connected = True
+    def connectionLost(self,connection,reason):
+        self.connected = False
+    def parse(self,line):
+        vals = line.split(',')[0:4]
+    def lineReceived(self, line):
+        self.scr_obj.
+
+class IMClientFactory(protocol.ClientFactory):
+    protocol = IMClient
+
+    def clientConnectionLost(self,connector,reason):
+        reactor.stop()
+    def clientConnectionFailed(self,connector,reason):
+        reactor.stop()
+
 class UserClient(object):
     def __init__(self, password = '', usr_id = 0, alias = 'noone'):
         self.s = None
