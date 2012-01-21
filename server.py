@@ -53,7 +53,7 @@ class IMProtocol(basic.LineReceiver):
         elif req.msg_type == LOGIN:
             self.__login_user(req)
         elif req.msg_type == LOGOUT:
-            self.__logout_user(req):
+            self.__logout_user(req)
         elif req.msg_type == CREATE_USER:
             self.__create_user(req)
 class IMServerFactory(protocol.ServerFactory):
