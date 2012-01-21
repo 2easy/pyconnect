@@ -12,7 +12,9 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(name)s: %(message)s')
 logger = logging.getLogger('Server')
 ######################################################
-from twisted.internet import reactor, protocol
+from twisted.cred import portal, credentials
+from auth import *
+from twisted.internet import reactor, protocol, defer
 from twisted.protocols import basic
 
 class IMProtocol(basic.LineReceiver):
@@ -31,7 +33,22 @@ class IMProtocol(basic.LineReceiver):
         # forward message
         msg = Message(Message.private,msg.src_id,msg.msg,msg.dst_id)
         recipient.transport.write(str(msg))
-    def __login_user(self, req): pass
+    def __login_user(self, req):
+        creds = credentials.UsernamePassword(req.src_id,req.msg)
+        self.factory.portal.login(creds,None,INamedUserAvatar).addCallback(
+                self.__login_succeeded).addErrback(self.__login_failed)
+    def __login_succeeded(self,avatar_info):
+        # add avatar to logged in clients list
+        avatar_interface, avatar, logout = avatar_info
+        self.factory.clients[avatar.usr_id] = avatar_info
+        self.transport.write(str(Message(Message.login,0,locale.Login.succ_msg,
+                                         avatar.usr_id)))
+    def __login_failed(self, failure):
+        logger.debug("failure: %s", str(failure))
+        self.transport.write(str(Message(Message.login,0,
+                                         locale.Login.failed_msg,
+                                         0)))
+        self.transport.loseConnection()
     def __logout_user(self, req):
         pass
         #logger.debug("Client -- %s -- logged out", self.transport.getPeer())
@@ -46,20 +63,27 @@ class IMProtocol(basic.LineReceiver):
         # parse received packet
         try:    req = Message(*line.split(','))
         except TypeError, msg:
-            raise MessageFormatInvalid("Invalid message format: "+msg)
+            raise MessageFormatInvalid("Invalid message format: "+str(msg))
         # react accordingly
         if req.msg_type == Message.private:
             self.__forward_message(req)
-        elif req.msg_type == LOGIN:
+        elif req.msg_type == Message.login:
             self.__login_user(req)
-        elif req.msg_type == LOGOUT:
+        elif req.msg_type == Message.logout:
             self.__logout_user(req)
-        elif req.msg_type == CREATE_USER:
+        elif req.msg_type == Message.create:
             self.__create_user(req)
 class IMServerFactory(protocol.ServerFactory):
-    clients  = {}
     protocol = IMProtocol
+    clients  = {}
+    def __init__(self, portal):
+        self.portal = portal
+
+users     = {'ja':'piotrek'}
+passwords = {'ja':'niewiem'}
 
 if __name__ == '__main__':
-    reactor.listenTCP(PORT,IMServerFactory())
+    p = portal.Portal(UserAvatarsRealm(users))
+    p.registerChecker(PasswordDictChecker(passwords))
+    reactor.listenTCP(PORT,IMServerFactory(p))
     reactor.run()
