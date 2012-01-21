@@ -13,6 +13,8 @@ LOGOUT      = 3
 FORWARD     = 4
 EMPTY       = 8
 INVALID     = 9
+msg_types = [CREATE_USER, DELETE_USER, LOGIN,
+             LOGOUT, FORWARD,EMPTY,INVALID   ]
 ############################ MESSAGE FORMAT #############################
 # AUTHOR                                                                #
 # RECIPIENT                                                             #
