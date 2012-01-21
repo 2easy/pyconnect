@@ -1,22 +1,18 @@
 import sqlite3
+from twisted.enterprise import util as dbutil
+
 from db_agent import DBAgent
 
 class ServerDBAgent(DBAgent):
     def __init__(self, filename, init_cmds):
         super(ServerDBAgent,self).__init__(filename, init_cmds)
 
-    def save_user(self,password):
-        try:
-            self.c.execute('insert into users values (?)', (password,))
-            self.usr_db.commit()
-            return self.c.lastrowid
-        except:
-            return -1
-
-    def fetch_password(self,uid):
-        try:
-            self.c.execute('select pass from users where rowid = (?)', (uid,))
-            (saved_pass,) = self.c.fetchone()
-            return saved_pass
-        except:
-            return ''
+    def fetch_password(self,credentials,callback):
+        query = "select rowid,password from users where username = %s" % (
+                dbutil.quote(credentials.username, "char"))
+        return self._db_conn.runQuery(query).addCallback(
+                callback, credentials)
+    def fetch_avatar(self,avatar_id,callback):
+        query = "select username,fullname from users where rowid = %s" % (
+                dbutil.quote(avatar_id, "int"))
+        return self._db_conn.runQuery(query).addCallback(callback)

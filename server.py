@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 ############### Imports and globals #################
 from server_db import ServerDBAgent
-db = ServerDBAgent('users.sqlite', ['create table users (pass text)'])
+db_agent = ServerDBAgent('users.sqlite',
+                         ['''create table users
+                                 (username text,
+                                  fullname text,
+                                  password text)'''])
 
 PORT = 8888
 from message import *
@@ -40,9 +44,9 @@ class IMProtocol(basic.LineReceiver):
     def __login_succeeded(self,avatar_info):
         # add avatar to logged in clients list
         avatar_interface, avatar, logout = avatar_info
-        self.factory.clients[avatar.usr_id] = avatar_info
+        self.factory.clients[avatar.username] = avatar_info
         self.transport.write(str(Message(Message.login,0,locale.Login.succ_msg,
-                                         avatar.usr_id)))
+                                         avatar.username)))
     def __login_failed(self, failure):
         logger.debug("failure: %s", str(failure))
         self.transport.write(str(Message(Message.login,0,
@@ -79,11 +83,8 @@ class IMServerFactory(protocol.ServerFactory):
     def __init__(self, portal):
         self.portal = portal
 
-users     = {'ja':'piotrek'}
-passwords = {'ja':'niewiem'}
-
 if __name__ == '__main__':
-    p = portal.Portal(UserAvatarsRealm(users))
-    p.registerChecker(PasswordDictChecker(passwords))
+    p = portal.Portal(DBRealm(db_agent))
+    p.registerChecker(DBPasswordChecker(db_agent))
     reactor.listenTCP(PORT,IMServerFactory(p))
     reactor.run()

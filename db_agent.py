@@ -1,4 +1,5 @@
 import sqlite3
+from twisted.enterprise import adbapi
 
 class DBAgent(object):
     def __init__(self,filename,init_cmds):
@@ -15,3 +16,4 @@ class DBAgent(object):
         else:
             self.usr_db = sqlite3.connect(filename)
             self.c = self.usr_db.cursor()
+        self._db_conn = adbapi.ConnectionPool('sqlite3',filename)
