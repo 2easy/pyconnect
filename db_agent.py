@@ -15,4 +15,3 @@ class DBAgent(object):
         else:
             self.usr_db = sqlite3.connect(filename)
             self.c = self.usr_db.cursor()
-
