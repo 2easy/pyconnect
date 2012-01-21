@@ -28,11 +28,13 @@ class IMProtocol(basic.LineReceiver):
         logger.debug("Client -- %s -- disconnected", self.transport.getPeer())
     def __forward_message(self,msg):
         # check sender identity
-        try: sender    = self.factory.clients[msg.src_id]
+        try: sender    = self.factory.clients[msg.src_id][0]
         except KeyError: self.transport.loseConnection()
-        if sender != self: self.transport.loseConnection()
+        if sender != self:
+            self.transport.loseConnection()
+            return
         # check if the recipient is logged in
-        try: recipient = self.factory.clients[msg.dst_id]
+        try: recipient = self.factory.clients[msg.dst_id][0]
         except KeyError: return
         # forward message
         msg = Message(Message.private,msg.src_id,msg.msg,msg.dst_id)
@@ -44,7 +46,7 @@ class IMProtocol(basic.LineReceiver):
     def __login_succeeded(self,avatar_info):
         # add avatar to logged in clients list
         avatar_interface, avatar, logout = avatar_info
-        self.factory.clients[avatar.username] = avatar_info
+        self.factory.clients[avatar.username] = (self,avatar_info)
         self.transport.write(str(Message(Message.login,0,locale.Login.succ_msg,
                                          avatar.username)))
     def __login_failed(self, failure):
