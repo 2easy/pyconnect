@@ -47,6 +47,7 @@ class IMProtocol(basic.LineReceiver):
         # add avatar to logged in clients list
         avatar_interface, avatar, logout = avatar_info
         self.factory.clients[avatar.username] = (self,avatar_info)
+        self.avatar = avatar
         self.transport.write(str(Message(Message.login,0,locale.Login.succ_msg,
                                          avatar.username)))
     def __login_failed(self, failure):
@@ -56,12 +57,11 @@ class IMProtocol(basic.LineReceiver):
                                          0)))
         self.transport.loseConnection()
     def __logout_user(self, req):
-        pass
-        #logger.debug("Client -- %s -- logged out", self.transport.getPeer())
-        #self.factory.clients.remove(self)
-        #resp = Message(SERVER_ID, req.src_id, LOGOUT, locale.Login.success)
-        #self.transport.write(resp.to_s())
-        #self.transport.loseConnection()
+        try:
+            self.factory.clients.pop(self.avatar.username)
+        finally:
+            self.transport.loseConnection()
+        logger.debug("Client -- %s -- logged out", self.avatar.username)
     def __create_user(self, req): pass
     def lineReceived(self, line):
         logger.debug("Received: %s   | from %s",
