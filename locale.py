@@ -24,12 +24,12 @@ class Account(General):
     q_save          = 'Save contact?'
     q_remember_pass = 'Remember password?'
     your_acc_id_is  = 'Your account ID is'
-class Rgst(General):
-    rgst   = 'Registration'
+class Create(General):
+    create = 'Create new user'
     succ   = 'Registration successful :)'
     failed = 'Registration failed, please do not try to break anything'
 class Login(General):
     wrong_uid   = 'Wrong User ID'
-    succ_msg    = 'Login succesful :)'
-    failed_msg  = 'Login failed (user id or password invalid)'
+    succ    = 'Login succesful :)'
+    failed  = 'Login failed (user id or password invalid)'
     invalid_uid = 'Your User ID is invalid (must be integer)'

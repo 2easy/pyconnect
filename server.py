@@ -23,9 +23,11 @@ from twisted.protocols import basic
 
 class IMProtocol(basic.LineReceiver):
     def connectionMade(self):
-        logger.debug("Client -- %s -- connected", self.transport.getPeer())
+        self.peer = self.transport.getPeer()
+        self.peer_info = "%s:%s" % (self.peer.host, self.peer.port)
+        logger.debug("Client -- %s -- connected", self.peer_info)
     def connectionLost(self, reason):
-        logger.debug("Client -- %s -- disconnected", self.transport.getPeer())
+        logger.debug("Client -- %s -- disconnected", self.peer_info)
     def __forward_message(self,msg):
         # check sender identity
         try: sender    = self.factory.clients[msg.src_id][0]
@@ -48,24 +50,46 @@ class IMProtocol(basic.LineReceiver):
         avatar_interface, avatar, logout = avatar_info
         self.factory.clients[avatar.username] = (self,avatar_info)
         self.avatar = avatar
-        self.transport.write(str(Message(Message.login,0,locale.Login.succ_msg,
+        self.transport.write(str(Message(Message.login,0,locale.Login.succ,
                                          avatar.username)))
+        logger.debug("user %s has logged in", self.avatar.username)
     def __login_failed(self, failure):
-        logger.debug("failure: %s", str(failure))
-        self.transport.write(str(Message(Message.login,0,
-                                         locale.Login.failed_msg,
-                                         0)))
+        logger.debug("peer %s has failed to log in because of %s",
+                     self.peer_info, str(failure.getErrorMessage()))
+        self.transport.write(str(Message(Message.login,'server',
+                                         locale.Login.failed)))
         self.transport.loseConnection()
     def __logout_user(self, req):
         try:
             self.factory.clients.pop(self.avatar.username)
         finally:
             self.transport.loseConnection()
-        logger.debug("Client -- %s -- logged out", self.avatar.username)
-    def __create_user(self, req): pass
+        logger.debug("user %s has logged out", self.avatar.username)
+    def __create_user(self, req):
+        # TODO add fullname
+        username,password,fullname = req.src_id, req.msg, "noone"
+        d = db_agent.find_user(username)
+        d.addCallback(self._save_decision,username,password,fullname)
+        d.addErrback(self._creation_failure)
+    def _save_decision(self,found_user,username,password,fullname):
+        if found_user:
+            self._creation_failure()
+        else:
+            d = db_agent.save_user(username,password,fullname)
+            d.addCallback(self._creation_success,username,fullname)
+            d.addErrback(self._creation_failure)
+    def _creation_success(self,result,username,fullname):
+        # result arg is always None, but callback must have it
+        logger.debug("user %s(%s) has been created", username,fullname)
+        self.transport.write(str(Message(Message.create,'server',
+                                         locale.Create.succ)))
+    def _creation_failure(self,failure = None):
+        if failure: logger.debug(failure.getErrorMessage())
+        else: logger.debug("%s requested occupied username", self.peer_info)
+        self.transport.write(str(Message(Message.create,'server',
+                                         locale.Create.failed)))
     def lineReceived(self, line):
-        logger.debug("Received: %s   | from %s",
-                      repr(line), self.transport.getPeer())
+        logger.debug("Received: %s   | from %s", repr(line), self.peer_info)
         # parse received packet
         try:    req = Message(*line.split(','))
         except TypeError, msg:

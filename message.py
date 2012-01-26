@@ -5,7 +5,7 @@ class Message(object):
     # define message types
     create,delete,login,logout,ping,invalid,private = range(7)
     types = range(7)
-    def __init__(self,msg_type,src_id=0,msg='',dst_id=0):
+    def __init__(self,msg_type,src_id=0,msg='',dst_id=''):
         self.__validate_msg_type(msg_type)
         self.msg_type = int(msg_type)
         self.src_id   = src_id
