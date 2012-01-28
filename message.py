@@ -20,5 +20,5 @@ class Message(object):
         if msg_type not in Message.types:
             raise MessageTypeInvalid("Invalid message type")
     def __str__(self):
-        return "{},{},{},{}\n".format(self.msg_type,self.src_id,
-                                      self.msg,self.dst_id)
+        return "{},{},{},{}\r\n".format(self.msg_type,self.src_id,
+                                        self.msg,self.dst_id)

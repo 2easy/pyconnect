@@ -9,7 +9,7 @@ db_agent = ServerDBAgent('users.sqlite',
 
 PORT = 8888
 from message import *
-import locale
+import app_locale as locale
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -18,7 +18,7 @@ logger = logging.getLogger('Server')
 ######################################################
 from twisted.cred import portal, credentials
 from auth import *
-from twisted.internet import reactor, protocol, defer
+from twisted.internet import reactor, protocol
 from twisted.protocols import basic
 
 class IMProtocol(basic.LineReceiver):
