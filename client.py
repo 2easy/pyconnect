@@ -81,7 +81,7 @@ class Controller(object):
         msg = Message(*line.split(',',4))
         if msg.msg_type == Message.login and msg.msg == app_locale.Login.succ:
             self.username = msg.dst_id
-        self.view.rawWrite(msg.msg)
+        self.view.rawWrite(msg.src_id+": "+msg.msg)
         self.loop.draw_screen()
     def _assignConnection(self,conn):
         self.connection = conn
@@ -111,9 +111,9 @@ class Controller(object):
                     self.connection.transport.write(msg)
                 else:
                     self.view.rawWrite("/create <username> <password>")
-            elif cmd.startswith("/s"):
-                msg_type, src_id, msg, dst_id = cmd[2:].split(',')
-                msg = str(Message(msg_type,src_id,msg,dst_id))
+            elif cmd.startswith("/msg"):
+                dst_id, msg = cmd.split(' ',2)[1:]
+                msg = str(Message(Message.private,self.username,msg,dst_id))
                 self.connection.transport.write(msg)
             elif cmd.startswith("/quit"):
                 raise urwid.ExitMainLoop()

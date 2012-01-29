@@ -50,8 +50,8 @@ class IMProtocol(basic.LineReceiver):
         avatar_interface, avatar, logout = avatar_info
         self.factory.clients[avatar.username] = (self,avatar_info)
         self.avatar = avatar
-        self.transport.write(str(Message(Message.login,0,locale.Login.succ,
-                                         avatar.username)))
+        self.transport.write(str(Message(Message.login,'server',
+                                         locale.Login.succ, avatar.username)))
         logger.debug("user %s has logged in", self.avatar.username)
     def __login_failed(self, failure):
         logger.debug("peer %s has failed to log in because of %s",
