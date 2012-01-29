@@ -62,6 +62,8 @@ class IMProtocol(basic.LineReceiver):
     def __logout_user(self, req):
         try:
             self.factory.clients.pop(self.avatar.username)
+            self.transport.write(str(Message(Message.logout,'server',
+                                             locale.Logout.succ)))
         finally:
             self.transport.loseConnection()
         logger.debug("user %s has logged out", self.avatar.username)

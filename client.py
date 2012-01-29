@@ -8,6 +8,8 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from message import Message
 
+import app_locale
+
 from client_db import ClientDBAgent
 db = ClientDBAgent('local_accounts.sqlite',
                    ['create table users (alias text, user_id int, pass text)']
@@ -16,8 +18,10 @@ db = ClientDBAgent('local_accounts.sqlite',
 class IMClient(LineReceiver):
     def connectionMade(self):
         self.connected = True
+        self.factory.controller.connected()
     def connectionLost(self,reason):
         self.connected = False
+        self.factory.controller.disconnected()
     def lineReceived(self, line):
         self.factory.controller.process(line)
 
@@ -31,7 +35,6 @@ class IMClientFactory(Factory):
         cli = self.protocol()
         cli.factory = self
         cli.username = self.controller.username
-        #self.controller.connection = cli
         return cli
     def clientConnectionLost(self,connector,reason):
         reactor.stop()
@@ -68,8 +71,16 @@ class Controller(object):
                                    unhandled_input=self.handleKeys,
                                    event_loop=urwid.TwistedEventLoop())
         self.loop.run()
+    def connected(self):
+        self.view.rawWrite(app_locale.General.connected)
+        self.loop.draw_screen()
+    def disconnected(self):
+        self.view.rawWrite(app_locale.General.disconnected)
+        self.loop.draw_screen()
     def process(self,line):
         msg = Message(*line.split(',',4))
+        if msg.msg_type == Message.login and msg.msg == app_locale.Login.succ:
+            self.username = msg.dst_id
         self.view.rawWrite(msg.msg)
         self.loop.draw_screen()
     def _assignConnection(self,conn):
@@ -83,6 +94,23 @@ class Controller(object):
                 d.addCallback(self._assignConnection)
             elif cmd.startswith('/disconnect'):
                 self.connection.transport.loseConnection()
+            elif cmd.startswith('/login'):
+                username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                if username and password:
+                    msg = str(Message(Message.login,username,password,''))
+                    self.connection.transport.write(msg)
+                else:
+                    self.view.rawWrite("/login <username> <password>")
+            elif cmd.startswith('/logout'):
+                msg = str(Message(Message.logout,self.username))
+                self.connection.transport.write(msg)
+            elif cmd.startswith('/create'):
+                username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                if username and password:
+                    msg = str(Message(Message.create,username,password,''))
+                    self.connection.transport.write(msg)
+                else:
+                    self.view.rawWrite("/create <username> <password>")
             elif cmd.startswith("/s"):
                 msg_type, src_id, msg, dst_id = cmd[2:].split(',')
                 msg = str(Message(msg_type,src_id,msg,dst_id))

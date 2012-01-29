@@ -4,6 +4,8 @@ class General(object):
     failure  = 'Failure'
     user_id  = 'User ID'
     password = 'Password'
+    connected = 'Connected'
+    disconnected = 'Disconnected'
     user     = 'User'
     error    = 'Error'
     db_error = 'Database error'
@@ -28,6 +30,8 @@ class Create(General):
     create = 'Create new user'
     succ   = 'Registration successful :)'
     failed = 'Registration failed, please do not try to break anything'
+class Logout(General):
+    succ = 'Log out successfully'
 class Login(General):
     wrong_uid   = 'Wrong User ID'
     succ    = 'Login succesful :)'
