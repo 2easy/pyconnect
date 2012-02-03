@@ -113,8 +113,9 @@ class Controller(object):
                     self.view.rawWrite("/create <username> <password>")
             elif cmd.startswith("/msg"):
                 dst_id, msg = cmd.split(' ',2)[1:]
-                msg = str(Message(Message.private,self.username,msg,dst_id))
-                self.connection.transport.write(msg)
+                msg = Message(Message.private,self.username,msg,dst_id)
+                self.view.rawWrite(msg.src_id+": "+msg.msg)
+                self.connection.transport.write(str(msg))
             elif cmd.startswith("/quit"):
                 raise urwid.ExitMainLoop()
             self.view.footer.set_edit_text('')
