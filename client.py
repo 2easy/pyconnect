@@ -78,7 +78,7 @@ class Controller(object):
         self.view.rawWrite(app_locale.General.disconnected)
         self.loop.draw_screen()
     def process(self,line):
-        msg = Message(*line.split(',',4))
+        msg = Message(*line.split(',',3))
         if msg.msg_type == Message.login and msg.msg == app_locale.Login.succ:
             self.username = msg.dst_id
         self.view.rawWrite(msg.src_id+": "+msg.msg)
@@ -95,9 +95,13 @@ class Controller(object):
             elif cmd.startswith('/disconnect'):
                 self.connection.transport.loseConnection()
             elif cmd.startswith('/login'):
-                username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                try:
+                    username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                except:
+                    self.view.rawWrite("/msg <username> <message>")
+                    return
                 if username and password:
-                    msg = str(Message(Message.login,username,password,''))
+                    msg = str(Message(Message.login,username,'',password))
                     self.connection.transport.write(msg)
                 else:
                     self.view.rawWrite("/login <username> <password>")
@@ -105,9 +109,13 @@ class Controller(object):
                 msg = str(Message(Message.logout,self.username))
                 self.connection.transport.write(msg)
             elif cmd.startswith('/create'):
-                username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                try:
+                    username, password = self.view.footer.edit_text.split(' ',2)[1:3]
+                except:
+                    self.view.rawWrite("/msg <username> <message>")
+                    return
                 if username and password:
-                    msg = str(Message(Message.create,username,password,''))
+                    msg = str(Message(Message.create,username,'',password))
                     self.connection.transport.write(msg)
                 else:
                     self.view.rawWrite("/create <username> <password>")
@@ -117,7 +125,7 @@ class Controller(object):
                 except:
                     self.view.rawWrite("/msg <username> <message>")
                     return
-                msg = Message(Message.private,self.username,msg,dst_id)
+                msg = Message(Message.private,self.username,dst_id,msg)
                 self.view.rawWrite(msg.src_id+" to "+msg.dst_id+": "+msg.msg)
                 self.connection.transport.write(str(msg))
             elif cmd.startswith("/quit"):

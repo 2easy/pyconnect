@@ -5,11 +5,13 @@ class Message(object):
     # define message types
     create,delete,login,logout,ping,invalid,private = range(7)
     types = range(7)
-    def __init__(self,msg_type,src_id='',msg='',dst_id=''):
+    def __init__(self,msg_type,src_id='',dst_id='',msg=''):
         self.__validate_msg_type(msg_type)
         self.msg_type = int(msg_type)
         self.src_id   = src_id
-        self.msg      = msg
+#        import re
+#        self.msg      = ' '.join(re.findall(r'\w+',msg))
+        self.msg = msg
         self.dst_id   = dst_id
     def __validate_msg_type(self,msg_type):
         # validate message type
@@ -21,4 +23,4 @@ class Message(object):
             raise MessageTypeInvalid("Invalid message type")
     def __str__(self):
         return "{},{},{},{}\r\n".format(self.msg_type,self.src_id,
-                                        self.msg,self.dst_id)
+                                        self.dst_id,self.msg)

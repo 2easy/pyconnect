@@ -30,6 +30,7 @@ class IMProtocol(basic.LineReceiver):
         logger.debug("Client -- %s -- disconnected", self.peer_info)
     def __forward_message(self,msg):
         # check sender identity
+        sender = None
         try: sender    = self.factory.clients[msg.src_id][0]
         except KeyError: self.transport.loseConnection()
         if sender != self:
@@ -39,7 +40,7 @@ class IMProtocol(basic.LineReceiver):
         try: recipient = self.factory.clients[msg.dst_id][0]
         except KeyError: return
         # forward message
-        msg = Message(Message.private,msg.src_id,msg.msg,msg.dst_id)
+        msg = Message(Message.private,msg.src_id,msg.dst_id,msg.msg)
         recipient.transport.write(str(msg))
     def __login_user(self, req):
         creds = credentials.UsernamePassword(req.src_id,req.msg)
@@ -51,18 +52,19 @@ class IMProtocol(basic.LineReceiver):
         self.factory.clients[avatar.username] = (self,avatar_info)
         self.avatar = avatar
         self.transport.write(str(Message(Message.login,'server',
-                                         locale.Login.succ, avatar.username)))
+                                         avatar.username, locale.Login.succ)))
         logger.debug("user %s has logged in", self.avatar.username)
     def __login_failed(self, failure):
         logger.debug("peer %s has failed to log in because of %s",
                      self.peer_info, str(failure.getErrorMessage()))
-        self.transport.write(str(Message(Message.login,'server',
+        self.transport.write(str(Message(Message.login,'server','',
                                          locale.Login.failed)))
         self.transport.loseConnection()
     def __logout_user(self, req):
         try:
             self.factory.clients.pop(self.avatar.username)
             self.transport.write(str(Message(Message.logout,'server',
+                                             self.avatar.username,
                                              locale.Logout.succ)))
         finally:
             self.transport.loseConnection()
@@ -83,17 +85,17 @@ class IMProtocol(basic.LineReceiver):
     def _creation_success(self,result,username,fullname):
         # result arg is always None, but callback must have it
         logger.debug("user %s(%s) has been created", username,fullname)
-        self.transport.write(str(Message(Message.create,'server',
+        self.transport.write(str(Message(Message.create,'server','',
                                          locale.Create.succ)))
     def _creation_failure(self,failure = None):
         if failure: logger.debug(failure.getErrorMessage())
         else: logger.debug("%s requested occupied username", self.peer_info)
-        self.transport.write(str(Message(Message.create,'server',
+        self.transport.write(str(Message(Message.create,'server','',
                                          locale.Create.failed)))
     def lineReceived(self, line):
         logger.debug("Received: %s   | from %s", repr(line), self.peer_info)
         # parse received packet
-        try:    req = Message(*line.split(','))
+        try:    req = Message(*line.split(',',3))
         except TypeError, msg:
             raise MessageFormatInvalid("Invalid message format: "+str(msg))
         # react accordingly

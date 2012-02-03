@@ -28,12 +28,12 @@ class Account(General):
     your_acc_id_is  = 'Your account ID is'
 class Create(General):
     create = 'Create new user'
-    succ   = 'Registration successful :)'
+    succ   = 'Registration successful'
     failed = 'Registration failed, please do not try to break anything'
 class Logout(General):
     succ = 'Log out successfully'
 class Login(General):
     wrong_uid   = 'Wrong User ID'
-    succ    = 'Login succesful :)'
+    succ    = 'Login succesful'
     failed  = 'Login failed (user id or password invalid)'
     invalid_uid = 'Your User ID is invalid (must be integer)'
