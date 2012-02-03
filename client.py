@@ -112,9 +112,13 @@ class Controller(object):
                 else:
                     self.view.rawWrite("/create <username> <password>")
             elif cmd.startswith("/msg"):
-                dst_id, msg = cmd.split(' ',2)[1:]
+                try:
+                    dst_id, msg = cmd.split(' ',2)[1:]
+                except:
+                    self.view.rawWrite("/msg <username> <message>")
+                    return
                 msg = Message(Message.private,self.username,msg,dst_id)
-                self.view.rawWrite(msg.src_id+": "+msg.msg)
+                self.view.rawWrite(msg.src_id+" to "+msg.dst_id+": "+msg.msg)
                 self.connection.transport.write(str(msg))
             elif cmd.startswith("/quit"):
                 raise urwid.ExitMainLoop()
